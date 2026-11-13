@@ -1,0 +1,90 @@
+# The project-generating edges. Everything here is a seed hypothesis
+# (status defaults to "unverified") until a Cartographer confirms it with the
+# actor or maintainer concerned and adds `evidence` + `verified_by`.
+edges:
+  # --- ADDRESSES: existing tech that covers a problem, fully or partially ---
+  - {from: mne-bids, type: ADDRESSES, to: consumer-eeg-bids-export, coverage: partial,
+     note: "Writes valid EEG-BIDS but needs an MNE Raw object and hand-built metadata first."}
+  - {from: mne-bids, type: ADDRESSES, to: xdf-to-bids, coverage: partial,
+     note: "Handles the BIDS side only."}
+  - {from: pyxdf, type: ADDRESSES, to: xdf-to-bids, coverage: partial,
+     note: "Handles the XDF side only."}
+  - {from: muselsl, type: ADDRESSES, to: cross-platform-ble-lsl-bridges, coverage: partial,
+     note: "Muse only."}
+  - {from: bluemuse, type: ADDRESSES, to: cross-platform-ble-lsl-bridges, coverage: partial,
+     note: "Muse only, Windows only."}
+  - {from: brainflow, type: ADDRESSES, to: cross-platform-ble-lsl-bridges, coverage: partial,
+     note: "Uniform acquisition API across devices; LSL output is left to the user."}
+  - {from: brainflow, type: ADDRESSES, to: device-metadata-fragmentation, coverage: partial,
+     note: "Per-board descriptors exist but are internal to BrainFlow and omit electrode positions."}
+  - {from: device-descriptor-registry, type: ADDRESSES, to: device-metadata-fragmentation, coverage: full,
+     note: "Proposed; does not exist yet."}
+  - {from: muse-js, type: ADDRESSES, to: browser-acquisition-stack, coverage: partial,
+     note: "Muse only."}
+  - {from: neuroconv, type: ADDRESSES, to: nwb-bids-interop, coverage: partial}
+  - {from: autoreject, type: ADDRESSES, to: dry-electrode-artifact-rejection, coverage: partial,
+     note: "Designed around interpolation across many channels."}
+  - {from: moabb, type: ADDRESSES, to: ml-ready-harmonised-eeg, coverage: partial,
+     note: "Harmonised access for BCI paradigms only."}
+  - {from: braindecode, type: ADDRESSES, to: ml-ready-harmonised-eeg, coverage: partial,
+     note: "Dataset loaders for a small set of corpora."}
+  - {from: yasa, type: ADDRESSES, to: low-channel-sleep-staging-validation, coverage: partial,
+     note: "Open staging model; validated on PSG rather than wearable headbands."}
+  - {from: timeflux, type: ADDRESSES, to: low-latency-python-closed-loop, coverage: partial}
+  - {from: mne-lsl, type: ADDRESSES, to: low-latency-python-closed-loop, coverage: partial}
+  - {from: mne-nirs, type: ADDRESSES, to: low-cost-fnirs-pipeline, coverage: partial,
+     note: "Analysis only; no acquisition path for low-cost hardware."}
+
+  # --- REALLY_WANTS: who would benefit if this existed ---
+  - {from: eeg-expy, type: REALLY_WANTS, to: consumer-eeg-bids-export}
+  - {from: neurotechx, type: REALLY_WANTS, to: consumer-eeg-bids-export}
+  - {from: nemar, type: REALLY_WANTS, to: consumer-eeg-bids-export}
+  - {from: openbci-gui, type: REALLY_WANTS, to: consumer-eeg-bids-export}
+
+  - {from: eeg-expy, type: REALLY_WANTS, to: ble-timing-jitter}
+  - {from: muselsl, type: REALLY_WANTS, to: ble-timing-jitter}
+  - {from: brainflow, type: REALLY_WANTS, to: ble-timing-jitter}
+
+  - {from: eeg-expy, type: REALLY_WANTS, to: cross-platform-ble-lsl-bridges}
+  - {from: timeflux, type: REALLY_WANTS, to: cross-platform-ble-lsl-bridges}
+  - {from: neurotechx, type: REALLY_WANTS, to: cross-platform-ble-lsl-bridges}
+
+  - {from: neurotechx, type: REALLY_WANTS, to: cross-device-signal-quality-benchmark}
+  - {from: eeg-expy, type: REALLY_WANTS, to: cross-device-signal-quality-benchmark}
+  - {from: pieeg, type: REALLY_WANTS, to: cross-device-signal-quality-benchmark}
+  - {from: upside-down-labs, type: REALLY_WANTS, to: cross-device-signal-quality-benchmark}
+
+  - {from: brainflow, type: REALLY_WANTS, to: device-descriptor-registry}
+  - {from: mne-python, type: REALLY_WANTS, to: device-descriptor-registry}
+  - {from: eeg-expy, type: REALLY_WANTS, to: device-descriptor-registry}
+
+  - {from: braindecode, type: REALLY_WANTS, to: ml-ready-harmonised-eeg}
+  - {from: moabb, type: REALLY_WANTS, to: ml-ready-harmonised-eeg}
+  - {from: braindecode, type: REALLY_WANTS, to: montage-harmonisation}
+  - {from: moabb, type: REALLY_WANTS, to: montage-harmonisation}
+
+  - {from: eeg-expy, type: REALLY_WANTS, to: dry-electrode-artifact-rejection}
+  - {from: neurosity-sdk, type: REALLY_WANTS, to: dry-electrode-artifact-rejection}
+
+  - {from: mne-bids, type: REALLY_WANTS, to: xdf-to-bids}
+  - {from: liblsl, type: REALLY_WANTS, to: xdf-to-bids}
+
+  - {from: neurotechx, type: REALLY_WANTS, to: open-validated-cognitive-metrics}
+  - {from: yasa, type: REALLY_WANTS, to: low-channel-sleep-staging-validation}
+  - {from: timeflux, type: REALLY_WANTS, to: low-latency-python-closed-loop}
+  - {from: neurotechx, type: REALLY_WANTS, to: low-cost-fnirs-pipeline}
+  - {from: neurotechx, type: REALLY_WANTS, to: browser-acquisition-stack}
+  - {from: dandi-archive, type: REALLY_WANTS, to: nwb-bids-interop}
+  - {from: openneuro, type: REALLY_WANTS, to: nwb-bids-interop}
+
+  # --- BLOCKS: bottleneck -> capability it holds back ---
+  - {from: ble-timing-jitter, type: BLOCKS, to: consumer-grade-erp-research}
+  - {from: dry-electrode-artifact-rejection, type: BLOCKS, to: consumer-grade-erp-research}
+  - {from: cross-device-signal-quality-benchmark, type: BLOCKS, to: consumer-grade-erp-research}
+  - {from: consumer-eeg-bids-export, type: BLOCKS, to: consumer-data-in-public-archives}
+  - {from: xdf-to-bids, type: BLOCKS, to: consumer-data-in-public-archives}
+  - {from: device-metadata-fragmentation, type: BLOCKS, to: consumer-eeg-bids-export}
+  - {from: device-metadata-fragmentation, type: BLOCKS, to: device-agnostic-apps}
+  - {from: cross-platform-ble-lsl-bridges, type: BLOCKS, to: device-agnostic-apps}
+  - {from: ml-ready-harmonised-eeg, type: BLOCKS, to: cross-device-eeg-foundation-models}
+  - {from: montage-harmonisation, type: BLOCKS, to: cross-device-eeg-foundation-models}

@@ -1,0 +1,26 @@
+defaults: {type: tech, kind: hardware, layer: hardware}
+nodes:
+  - {id: openbci-cyton, name: OpenBCI Cyton, url: "https://openbci.com",
+     description: "8-channel (16 with Daisy) open-hardware biosensing board."}
+  - {id: openbci-ganglion, name: OpenBCI Ganglion, url: "https://openbci.com",
+     description: "4-channel Bluetooth LE open-hardware biosensing board."}
+  - {id: muse-headband, name: Muse headbands (Muse 2 / Muse S), url: "https://choosemuse.com",
+     description: "4-channel dry-electrode consumer EEG headbands."}
+  - {id: emotiv-headsets, name: EMOTIV EPOC X / Insight, url: "https://www.emotiv.com",
+     description: "14- and 5-channel wireless EEG headsets."}
+  - {id: neurosity-crown, name: Neurosity Crown, url: "https://neurosity.co",
+     description: "8-channel dry-electrode EEG headset."}
+  - {id: unicorn-hybrid-black, name: Unicorn Hybrid Black, url: "https://www.gtec.at",
+     description: "8-channel hybrid-electrode wireless EEG headset."}
+  - {id: mentalab-explore, name: Mentalab Explore, url: "https://mentalab.com",
+     description: "Mobile 4–32 channel ExG amplifier."}
+  - {id: pieeg-shield, name: PiEEG shield, url: "https://pieeg.com",
+     description: "8-channel EEG shield for Raspberry Pi."}
+  - {id: bioamp-exg-pill, name: BioAmp EXG Pill, url: "https://upsidedownlabs.tech",
+     description: "Single-channel analog front end for EEG, EMG, ECG and EOG."}
+  - {id: kernel-flow, name: Kernel Flow, url: "https://www.kernel.com",
+     description: "Whole-head time-domain fNIRS headset."}
+  - {id: neuropixels, name: Neuropixels probes, url: "https://www.neuropixels.org",
+     description: "High-density silicon probes for extracellular recording."}
+  - {id: open-ephys-acq-board, name: Open Ephys acquisition board, url: "https://open-ephys.org",
+     description: "Open-hardware acquisition system for extracellular electrophysiology."}

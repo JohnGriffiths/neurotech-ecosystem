@@ -1,0 +1,15 @@
+name: Graph correction
+description: A node or edge is wrong, missing or out of date.
+labels: [cartography]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What should change?
+      description: Node ids and edge types if you know them. A pull request against graph/ is even better.
+    validations: {required: true}
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links supporting the change.

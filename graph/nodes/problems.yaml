@@ -1,0 +1,49 @@
+defaults: {type: problem, kind: bottleneck}
+nodes:
+  # --- interoperability glue ---
+  - {id: consumer-eeg-bids-export, name: One-step BIDS export for consumer EEG,
+     description: "Recordings from Muse, OpenBCI, Crown and similar devices land in ad-hoc CSVs. No tool takes a raw consumer recording plus minimal metadata and emits a valid EEG-BIDS dataset."}
+  - {id: xdf-to-bids, name: XDF to BIDS conversion,
+     description: "LSL LabRecorder writes XDF, archives want BIDS. Converting multi-stream XDF (EEG plus markers plus other modalities) to BIDS is manual and lossy."}
+  - {id: cross-platform-ble-lsl-bridges, name: Maintained cross-platform LSL bridges for BLE headsets,
+     description: "LSL bridges for Bluetooth LE devices are per-device, often single-platform or lightly maintained, and break with firmware or OS Bluetooth changes."}
+  - {id: device-metadata-fragmentation, name: Device metadata is scattered and inconsistent,
+     description: "Channel names, electrode positions, sampling rates and reference schemes are re-encoded by hand in every library that supports a device."}
+  - {id: nwb-bids-interop, name: NWB and BIDS interoperability,
+     description: "Invasive electrophysiology lives in NWB, human neuroimaging in BIDS. Datasets spanning both need duplicated metadata and bespoke conversion."}
+  - {id: browser-acquisition-stack, name: Browser-native acquisition and streaming stack,
+     description: "Web Bluetooth clients exist for single devices, but there is no shared browser-side abstraction with timing guarantees and standard export."}
+
+  # --- benchmarks and validation ---
+  - {id: cross-device-signal-quality-benchmark, name: Open cross-device signal quality benchmark,
+     description: "No public, repeatable protocol and dataset compares noise floor, ERP/SSVEP recovery and artifact resilience across consumer and prosumer EEG devices."}
+  - {id: ble-timing-jitter, name: Timing jitter and marker synchronisation on BLE devices,
+     description: "Bluetooth LE packet buffering introduces variable latency between stimulus markers and samples, with no shared method to measure or correct it per device."}
+  - {id: open-validated-cognitive-metrics, name: Open validated focus / calm / fatigue metrics,
+     description: "Vendor cognitive-state scores are proprietary and not comparable across devices. No open reference implementations validated against public data."}
+  - {id: low-channel-sleep-staging-validation, name: Validated sleep staging on low-channel wearable EEG,
+     description: "Open sleep staging models are trained on clinical PSG montages. Performance on frontal dry-electrode headbands is not openly benchmarked."}
+
+  # --- data curation ---
+  - {id: ml-ready-harmonised-eeg, name: ML-ready harmonised public EEG datasets,
+     description: "Public EEG datasets differ in format, montage, sampling rate, event coding and licence. Each ML project re-does the same cleaning before training."}
+  - {id: montage-harmonisation, name: Cross-montage channel harmonisation,
+     description: "Models trained on one electrode layout do not transfer to another. No standard open method maps arbitrary low-density montages into a shared representation."}
+
+  # --- signal processing ---
+  - {id: dry-electrode-artifact-rejection, name: "Artifact rejection for dry, low-channel EEG",
+     description: "Mainstream artifact methods (ICA, interpolation-based repair) assume many gel channels. Few-channel dry recordings need different, openly validated methods."}
+  - {id: low-latency-python-closed-loop, name: Low-latency closed-loop processing in Python,
+     description: "Building a sub-50 ms acquire-process-feedback loop in Python requires stitching several libraries, with no reference latency measurements."}
+  - {id: low-cost-fnirs-pipeline, name: Open pipeline for low-cost fNIRS,
+     description: "Hobbyist and low-cost fNIRS hardware lacks a shared acquisition-to-SNIRF path and quality-control tooling."}
+
+  # --- capabilities blocked by the above ---
+  - {id: consumer-grade-erp-research, kind: capability, name: Publishable ERP research on consumer hardware,
+     description: "Running event-related potential studies at scale outside the lab with data quality reviewers accept."}
+  - {id: consumer-data-in-public-archives, kind: capability, name: Consumer-device data in public archives,
+     description: "Community-collected recordings routinely deposited in OpenNeuro or NEMAR."}
+  - {id: cross-device-eeg-foundation-models, kind: capability, name: Cross-device EEG foundation models,
+     description: "Pretrained models that work across clinical, research and consumer montages."}
+  - {id: device-agnostic-apps, kind: capability, name: Device-agnostic neurotech applications,
+     description: "Applications that run unchanged across headsets from different vendors."}

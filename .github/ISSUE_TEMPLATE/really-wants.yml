@@ -1,0 +1,31 @@
+name: I really want this
+description: Tell us about a gap in the neurotech stack that you, your lab or your company needs filled.
+labels: [really-wants]
+body:
+  - type: input
+    id: who
+    attributes:
+      label: Who wants it?
+      description: Your project, lab or company. This becomes the source of a REALLY_WANTS edge.
+    validations: {required: true}
+  - type: textarea
+    id: what
+    attributes:
+      label: What is missing?
+      description: The problem, or the tool that should exist. Link an existing graph node if there is one.
+    validations: {required: true}
+  - type: textarea
+    id: tried
+    attributes:
+      label: What exists today and where does it fall short?
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Public links (issues, forum threads, papers) showing the need. Required for the edge to be marked verified.
+  - type: checkboxes
+    id: sponsor
+    attributes:
+      label: Sponsor
+      options:
+        - label: We could give about 1 hour every two weeks to review a spec as the "customer".

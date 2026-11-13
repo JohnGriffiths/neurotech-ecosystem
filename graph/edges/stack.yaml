@@ -1,0 +1,73 @@
+# DEPENDS_ON: the source cannot function without the target.
+# INTEGRATES_WITH: the source reads from, writes to, or drives the target.
+edges:
+  # --- library dependencies ---
+  - {from: pylsl, type: DEPENDS_ON, to: liblsl}
+  - {from: muselsl, type: DEPENDS_ON, to: pylsl}
+  - {from: bluemuse, type: DEPENDS_ON, to: liblsl}
+  - {from: mne-lsl, type: DEPENDS_ON, to: liblsl}
+  - {from: mne-lsl, type: DEPENDS_ON, to: mne-python}
+  - {from: mne-bids, type: DEPENDS_ON, to: mne-python}
+  - {from: mne-nirs, type: DEPENDS_ON, to: mne-python}
+  - {from: autoreject, type: DEPENDS_ON, to: mne-python}
+  - {from: yasa, type: DEPENDS_ON, to: mne-python}
+  - {from: moabb, type: DEPENDS_ON, to: mne-python}
+  - {from: moabb, type: DEPENDS_ON, to: pyriemann}
+  - {from: braindecode, type: DEPENDS_ON, to: mne-python}
+  - {from: openbci-gui, type: DEPENDS_ON, to: brainflow}
+  - {from: eeg-expy, type: DEPENDS_ON, to: brainflow}
+  - {from: eeg-expy, type: DEPENDS_ON, to: muselsl}
+  - {from: eeg-expy, type: DEPENDS_ON, to: psychopy}
+  - {from: eeg-expy, type: DEPENDS_ON, to: mne-python}
+  - {from: neuroconv, type: DEPENDS_ON, to: pynwb}
+  - {from: dandi-archive, type: DEPENDS_ON, to: nwb}
+  - {from: openneuro, type: DEPENDS_ON, to: bids}
+  - {from: nemar, type: DEPENDS_ON, to: openneuro}
+
+  # --- device support ---
+  - {from: brainflow, type: INTEGRATES_WITH, to: openbci-cyton}
+  - {from: brainflow, type: INTEGRATES_WITH, to: openbci-ganglion}
+  - {from: brainflow, type: INTEGRATES_WITH, to: muse-headband}
+  - {from: brainflow, type: INTEGRATES_WITH, to: neurosity-crown}
+  - {from: brainflow, type: INTEGRATES_WITH, to: unicorn-hybrid-black}
+  - {from: brainflow, type: INTEGRATES_WITH, to: mentalab-explore}
+  - {from: brainflow, type: INTEGRATES_WITH, to: pieeg-shield}
+  - {from: muselsl, type: INTEGRATES_WITH, to: muse-headband}
+  - {from: bluemuse, type: INTEGRATES_WITH, to: muse-headband}
+  - {from: muse-js, type: INTEGRATES_WITH, to: muse-headband}
+  - {from: explorepy, type: INTEGRATES_WITH, to: mentalab-explore}
+  - {from: neurosity-sdk, type: INTEGRATES_WITH, to: neurosity-crown}
+  - {from: emotiv-cortex, type: INTEGRATES_WITH, to: emotiv-headsets}
+  - {from: openbci-gui, type: INTEGRATES_WITH, to: openbci-cyton}
+  - {from: openbci-gui, type: INTEGRATES_WITH, to: openbci-ganglion}
+  - {from: open-ephys-gui, type: INTEGRATES_WITH, to: open-ephys-acq-board}
+  - {from: open-ephys-gui, type: INTEGRATES_WITH, to: neuropixels}
+
+  # --- streaming and format interop ---
+  - {from: openbci-gui, type: INTEGRATES_WITH, to: liblsl}
+  - {from: explorepy, type: INTEGRATES_WITH, to: liblsl}
+  - {from: timeflux, type: INTEGRATES_WITH, to: liblsl}
+  - {from: openvibe, type: INTEGRATES_WITH, to: liblsl}
+  - {from: bci2000, type: INTEGRATES_WITH, to: liblsl}
+  - {from: psychopy, type: INTEGRATES_WITH, to: liblsl}
+  - {from: pyxdf, type: INTEGRATES_WITH, to: xdf}
+  - {from: mne-python, type: INTEGRATES_WITH, to: edf}
+  - {from: mne-python, type: INTEGRATES_WITH, to: snirf}
+  - {from: mne-bids, type: INTEGRATES_WITH, to: bids}
+  - {from: eeglab, type: INTEGRATES_WITH, to: bids}
+  - {from: fieldtrip, type: INTEGRATES_WITH, to: bids}
+  - {from: pynwb, type: INTEGRATES_WITH, to: nwb}
+  - {from: spikeinterface, type: INTEGRATES_WITH, to: kilosort}
+  - {from: spikeinterface, type: INTEGRATES_WITH, to: nwb}
+  - {from: spikeinterface, type: INTEGRATES_WITH, to: open-ephys-gui}
+  - {from: neuroconv, type: INTEGRATES_WITH, to: spikeinterface}
+
+  # --- data access ---
+  - {from: moabb, type: INTEGRATES_WITH, to: bci-competition-iv}
+  - {from: moabb, type: INTEGRATES_WITH, to: eegmmidb}
+  - {from: braindecode, type: INTEGRATES_WITH, to: moabb}
+  - {from: braindecode, type: INTEGRATES_WITH, to: tuh-eeg}
+  - {from: mne-python, type: INTEGRATES_WITH, to: eegmmidb}
+  - {from: yasa, type: INTEGRATES_WITH, to: sleep-edf}
+  - {from: eegmmidb, type: DEPENDS_ON, to: physionet}
+  - {from: sleep-edf, type: DEPENDS_ON, to: physionet}

@@ -1,0 +1,51 @@
+defaults: {type: MAINTAINS}
+edges:
+  # hardware
+  - {from: openbci, to: openbci-cyton}
+  - {from: openbci, to: openbci-ganglion}
+  - {from: interaxon, to: muse-headband}
+  - {from: emotiv, to: emotiv-headsets}
+  - {from: neurosity, to: neurosity-crown}
+  - {from: gtec, to: unicorn-hybrid-black}
+  - {from: mentalab, to: mentalab-explore}
+  - {from: pieeg, to: pieeg-shield}
+  - {from: upside-down-labs, to: bioamp-exg-pill}
+  - {from: kernel, to: kernel-flow}
+  - {from: imec, to: neuropixels}
+  - {from: open-ephys, to: open-ephys-acq-board}
+  # software
+  - {from: openbci, to: openbci-gui}
+  - {from: emotiv, to: emotiv-cortex}
+  - {from: neurosity, to: neurosity-sdk}
+  - {from: mentalab, to: explorepy}
+  - {from: brainflow-dev, to: brainflow}
+  - {from: sccn, to: liblsl}
+  - {from: sccn, to: eeglab}
+  - {from: sccn, to: xdf}
+  - {from: sccn, to: nemar}
+  - {from: mne-tools, to: mne-python}
+  - {from: mne-tools, to: mne-bids}
+  - {from: mne-tools, to: mne-lsl}
+  - {from: mne-tools, to: mne-nirs}
+  - {from: donders, to: fieldtrip}
+  - {from: inria, to: openvibe}
+  - {from: ncan, to: bci2000}
+  - {from: timeflux-dev, to: timeflux}
+  - {from: open-science-tools, to: psychopy}
+  - {from: neurotechx, to: eeg-expy}
+  - {from: neurotechx, to: moabb}
+  - {from: braindecode-dev, to: braindecode}
+  - {from: pyriemann-dev, to: pyriemann}
+  - {from: spikeinterface-dev, to: spikeinterface}
+  - {from: open-ephys, to: open-ephys-gui}
+  - {from: catalystneuro, to: neuroconv}
+  - {from: nwb-community, to: pynwb}
+  # standards, archives, datasets
+  - {from: bids-community, to: bids}
+  - {from: nwb-community, to: nwb}
+  - {from: sfnirs, to: snirf}
+  - {from: poldrack-lab, to: openneuro}
+  - {from: dandi-team, to: dandi-archive}
+  - {from: mit-lcp, to: physionet}
+  - {from: temple-nedc, to: tuh-eeg}
+  - {from: child-mind-institute, to: hbn-eeg}
