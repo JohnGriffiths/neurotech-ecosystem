@@ -12,9 +12,9 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 
 // Entity types: four colour families, with shape separating the types that share one.
 const TYPES = {
-  project:    { label: "Projects",     color: "blue",    shape: "circle",   base: 4.5 },
-  device:     { label: "Devices",      color: "green",   shape: "square",   base: 3.5 },
-  modality:   { label: "Technologies", color: "green",   shape: "hexagon",  base: 7 },
+  project:    { label: "Projects",     color: "teal",    shape: "circle",   base: 4.5 },
+  device:     { label: "Devices",      color: "violet",   shape: "square",   base: 3.5 },
+  modality:   { label: "Technologies", color: "violet",   shape: "hexagon",  base: 7 },
   org:        { label: "Organisations", color: "yellow", shape: "square",   base: 3.5 },
   person:     { label: "People",       color: "yellow",  shape: "triangle-down", base: 3 },
   indication: { label: "Indications",  color: "magenta", shape: "triangle", base: 4.5 },
@@ -30,8 +30,8 @@ const TYPE_LABEL = { device: "Device", person: "Person", modality: "Technology",
 const typeLabel = (n) => KIND_LABEL[n.kind] || TYPE_LABEL[n.type] || n.type;
 
 const LENSES = {
-  class: { key: "class", values: [["sensing", "Sensing", "blue"], ["modulating", "Modulating", "yellow"]] },
-  invasiveness: { key: "invasiveness", values: [["noninvasive", "Noninvasive", "green"], ["invasive", "Invasive", "magenta"]] },
+  class: { key: "class", values: [["sensing", "Sensing", "teal"], ["modulating", "Modulating", "yellow"]] },
+  invasiveness: { key: "invasiveness", values: [["noninvasive", "Noninvasive", "teal"], ["invasive", "Invasive", "magenta"]] },
 };
 const REL = {
   MAINTAINS: ["Maintains", "Maintained by"],
@@ -56,7 +56,7 @@ let graph, byId, fg, C = {}, adjacency = {}, allLinks = [];
 // ------------------------------------------------------------------ colour ---
 function readTheme() {
   const cs = getComputedStyle(document.documentElement);
-  for (const k of ["blue", "yellow", "magenta", "green", "neutral", "text", "text-2", "bg", "link", "link-hi"]) {
+  for (const k of ["teal", "yellow", "magenta", "violet", "neutral", "text", "text-2", "bg", "link", "link-hi"]) {
     C[k] = cs.getPropertyValue(`--${k}`).trim();
   }
 }
@@ -209,7 +209,7 @@ function renderLegend() {
   const key = $("#legend");
   if (state.lens === "type") {
     key.replaceChildren(
-      el("li", { className: "static" }, glyph("circle", C.blue, true), "Proposed, not yet built"));
+      el("li", { className: "static" }, glyph("circle", C.teal, true), "Proposed, not yet built"));
   } else {
     const lens = LENSES[state.lens];
     const both = el("span", { className: "glyph" });
@@ -433,7 +433,7 @@ function init(data) {
   });
   $("#theme").addEventListener("click", () => {
     const root = document.documentElement;
-    const current = root.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+    const current = root.dataset.theme || "dark";
     root.dataset.theme = current === "dark" ? "light" : "dark";
     try { localStorage.setItem("theme", root.dataset.theme); } catch (e) { /* private mode */ }
     readTheme(); renderLegend(); renderDetail();

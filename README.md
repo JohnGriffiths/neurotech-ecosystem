@@ -39,7 +39,7 @@ python -m http.server -d dist      # http://localhost:8000
 | `graph/nodes/` | Projects, devices, organisations, people, technologies, indications, gaps |
 | `graph/edges/` | Relationships; `gaps.yaml` holds the project-generating ones |
 | `tools/ntgraph.py` | Validator, gap ranking and static site build |
-| `web/` | The viewer (`vendor/` holds [force-graph](https://github.com/vasturiano/force-graph), MIT) |
+| `web/` | The viewer. `vendor/` holds [force-graph](https://github.com/vasturiano/force-graph) (MIT) and the Orbitron font (OFL). The logo, favicon and colour scheme come from the original NeuroTechX website and belong to NeuroTechX. |
 | `docs/SCHEMA.md` | Node and edge types, verification rules, scoring |
 | `docs/rfcs/` | Project proposals derived from the graph |
 
