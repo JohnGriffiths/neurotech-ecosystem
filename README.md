@@ -60,6 +60,12 @@ That includes who maintains what, people's affiliations, clinical indications an
 and above all the `REALLY_WANTS` edges, which are hypotheses that have not been confirmed with the party
 named. Verifying them, and correcting what is wrong, is the job of the first cartography sprint.
 
+## Picking this up
+
+[AGENTS.md](AGENTS.md) orients an AI coding agent (or a person) to the repository.
+[docs/HANDOFF.md](docs/HANDOFF.md) records the current state, decisions and open items, and
+[docs/CONVERSATION.md](docs/CONVERSATION.md) the conversation that produced it.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for roles (Cartographer, Architect, Builder, Sponsor), how to edit

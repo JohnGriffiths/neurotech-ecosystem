@@ -1,0 +1,89 @@
+# Notes for AI coding agents
+
+Orientation for any agent harness picking this repository up. For what has been done so far and what is
+still open, read [docs/HANDOFF.md](docs/HANDOFF.md). For the conversation that produced it, read
+[docs/CONVERSATION.md](docs/CONVERSATION.md).
+
+## What this is
+
+A knowledge graph of the neurotechnology ecosystem, stored as YAML and explored through a static web
+viewer. Its purpose is to surface gaps that volunteer teams (the NeuroTechX community) can turn into
+scoped open-source projects. The owner is John Griffiths (`JohnGriffiths` on GitHub).
+
+## Commands
+
+```
+pip install -r requirements.txt
+python tools/ntgraph.py validate      # schema check; must pass before any commit
+python -m pytest -q                   # 9 tests
+python tools/ntgraph.py build         # writes dist/ (graph.json + a copy of web/)
+python -m http.server -d dist 8765    # view at http://localhost:8765
+python tools/ntgraph.py bounties      # ranked gaps as Markdown
+python tools/ntgraph.py check-repos   # git ls-remote every project repo (needs network)
+node tools/smoke_viewer.js http://localhost:8765 out.png   # headless check of the viewer (needs Playwright)
+```
+
+## Layout
+
+| Path | Contents |
+|---|---|
+| `graph/nodes/*.yaml` | Nodes by type: projects, devices, orgs, people, modalities, indications, problems |
+| `graph/edges/*.yaml` | Edges: `maintains`, `affiliations`, `stack`, `clinical`, `gaps` |
+| `tools/ntgraph.py` | The schema (`NODE_KINDS`, `EDGE_RULES`), loader, validator, facet derivation, gap ranking, site build |
+| `tests/test_graph.py` | Validator, facet and scoring tests |
+| `web/` | Viewer: `index.html`, `style.css`, `app.js`; `vendor/` holds bundled libraries and fonts |
+| `docs/SCHEMA.md` | Human-readable schema. Keep it in step with `tools/ntgraph.py`. |
+| `.github/workflows/graph.yml` | Validate and test on every PR and push; deploy `dist/` to GitHub Pages from `main` |
+
+`dist/` is build output and is git-ignored.
+
+## Rules for editing the graph
+
+- Every edge defaults to `status: unverified`. Only set `verified` with `evidence` (public URLs) and
+  `verified_by`. The validator enforces this.
+- Do not attribute a `REALLY_WANTS` edge to a real organisation, person or project without a public source.
+  If you believe the need exists but cannot source it, leave it `unverified`.
+- `INDICATED_FOR` edges are medical claims. They need a regulator or trial-registry link to be verified.
+- Add people only in a public role on a project or organisation.
+- A project needs `repo: owner/name` (GitHub), or a `url` if it is not on GitHub. Run `check-repos` after
+  adding repos.
+- `modalities: [eeg, meg]` on a project, device or org is shorthand for `USES` edges.
+- Never set class (sensing/modulating), invasiveness or clinical on anything but a modality. They are
+  derived at build time from `USES`, `MAINTAINS`, `AFFILIATED_WITH` and `INDICATED_FOR`.
+- The YAML uses one-line flow mappings. **Quote any string containing a comma or colon**, or YAML will
+  split it into bogus keys. The validator catches this as "unknown field".
+- Node ids are `lowercase-kebab-case` and must never be renamed once merged (they are deep-link targets).
+
+## How the viewer is put together
+
+- No build step and no framework. `app.js` is one IIFE that fetches `graph.json`.
+- Shared state lives in `state`. Two interchangeable renderers, `make2d` (force-graph, canvas) and
+  `make3d` (3d-force-graph, WebGL), each return `{ fg, setData, restyle, focus, fit, resize, destroy }`.
+  `mount(mode)` swaps between them. 3D is the default; 2D is the fallback when WebGL is missing.
+- The 2D canvas redraws from `state` every frame. The 3D view holds persistent objects, so anything that
+  changes appearance (hover, selection, lens, theme) must call `view.restyle()`.
+- Filters replace the graph data with a subset (`applyFilters`), reusing the same node objects.
+- Deep links: `#<node-id>` selects a node, `#gaps` opens the gaps board.
+- All asset paths are relative, so the site works under `/neurotech-ecosystem/` on GitHub Pages.
+
+## Visual rules
+
+- Colour scheme and logo come from the original neurotechx.com (2015–2017): black, white, teal `#23b2c6`,
+  Orbitron for headings. Dark is the default regardless of OS preference.
+- Entity types use four colour families plus shape, because seven distinct hues failed a colour-blind
+  separation check: teal (projects), violet (devices, technologies), yellow (organisations, people),
+  magenta (indications, gaps). Do not add a fifth hue without re-checking.
+- Text is always in a text colour, never a series colour.
+- UI copy uses British spelling (colour, organisation, harmonise).
+
+## Vendored libraries
+
+`web/vendor/README.md` lists versions, licences and the command that rebuilds `graph3d.min.js` from
+`graph3d.entry.js`. Libraries are vendored so the site works offline and from a plain static host.
+
+## Working agreements with the owner so far
+
+- No pull requests unless asked. When offered the choice, the owner chose to push straight to `main`.
+- Commit messages are plain prose describing the change; no model names in commits or code.
+- Be explicit about what is verified and what is from memory. The owner has been told all seed data is
+  unverified.
