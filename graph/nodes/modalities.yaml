@@ -8,6 +8,10 @@ nodes:
      description: "Magnetoencephalography: recording of the magnetic fields produced by neural currents."}
   - {id: fmri, class: sensing, invasiveness: noninvasive, name: fMRI,
      description: "Functional magnetic resonance imaging of blood-oxygenation changes."}
+  - {id: smri, class: sensing, invasiveness: noninvasive, name: Structural MRI,
+     description: "Anatomical magnetic resonance imaging of the brain."}
+  - {id: dmri, class: sensing, invasiveness: noninvasive, name: Diffusion MRI,
+     description: "Magnetic resonance imaging of water diffusion, used to map white-matter pathways."}
   - {id: fnirs, class: sensing, invasiveness: noninvasive, name: fNIRS,
      description: "Functional near-infrared spectroscopy of cortical haemodynamics."}
   - {id: emg, class: sensing, invasiveness: noninvasive, name: EMG,

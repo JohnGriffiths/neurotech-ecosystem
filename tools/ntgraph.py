@@ -4,6 +4,7 @@
     python tools/ntgraph.py validate          # check graph/ against the schema
     python tools/ntgraph.py bounties          # print the ranked bounty board
     python tools/ntgraph.py build [--out dist]  # write the static site
+    python tools/ntgraph.py check-repos       # confirm every project repo exists on GitHub
 
 The schema lives in this file (NODE_KINDS, EDGE_RULES) and is described for
 humans in docs/SCHEMA.md. Keep the two in step.
@@ -12,8 +13,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -27,7 +30,7 @@ WEB_DIR = ROOT / "web"
 
 # node type -> allowed kinds (None: the type has no kinds)
 NODE_KINDS = {
-    "project": {"software", "hardware", "dataset", "standard"},
+    "project": {"software", "hardware", "dataset", "standard", "resource"},
     "device": None,
     "org": {"company", "university", "institute", "lab", "oss_team", "community", "standards_body", "regulator"},
     "person": None,
@@ -35,7 +38,7 @@ NODE_KINDS = {
     "indication": None,
     "problem": {"bottleneck", "capability"},
 }
-LAYERS = {"acquisition", "streaming", "processing", "modelling", "ml", "experiment", "data", "standard", "hardware"}
+LAYERS = {"acquisition", "streaming", "processing", "modelling", "ml", "experiment", "data", "standard", "hardware", "community"}
 PROJECT_STATUS = {"exists", "proposed"}
 CLASSES = {"sensing", "modulating"}
 INVASIVENESS = {"invasive", "noninvasive"}
@@ -46,7 +49,7 @@ EDGE_RULES = {
     "AFFILIATED_WITH": ({"person", "org"}, {"org"}),
     "DEPENDS_ON": ({"project"}, {"project"}),
     "INTEGRATES_WITH": ({"project"}, {"project", "device"}),
-    "USES": ({"project", "device"}, {"modality"}),
+    "USES": ({"project", "device", "org"}, {"modality"}),
     "INDICATED_FOR": ({"device", "project", "modality"}, {"indication"}),
     "ADDRESSES": ({"project"}, {"problem"}),
     "REALLY_WANTS": ({"org", "person", "project"}, {"problem", "project"}),
@@ -57,7 +60,7 @@ COVERAGE = {"partial", "full"}
 STAGES = {"approved", "investigational"}
 
 NODE_FIELDS = {"id", "type", "kind", "name", "url", "description", "tags",
-               "repo", "layer", "status", "modalities",   # project (modalities also on device)
+               "repo", "layer", "status", "modalities",   # project (modalities also on device, org)
                "github",                                    # person
                "class", "invasiveness"}                     # modality
 EDGE_FIELDS = {"from", "to", "type", "status", "evidence", "verified_by", "note", "coverage", "stage", "endorsed_by"}
@@ -123,7 +126,7 @@ def load(graph_dir: Path = GRAPH_DIR) -> tuple[list[dict], list[dict], list[str]
             if not isinstance(n.get(field), str) or not n[field].strip():
                 errors.append(f"{src}: missing {field}")
 
-        allowed = {"project": {"repo", "layer", "status", "modalities"}, "device": {"modalities"},
+        allowed = {"project": {"repo", "layer", "status", "modalities"}, "device": {"modalities"}, "org": {"modalities"},
                    "person": {"github"}, "modality": {"class", "invasiveness"}}.get(ntype, set())
         for field in sorted({"repo", "layer", "status", "modalities", "github", "class", "invasiveness"} - allowed):
             if field in n:
@@ -151,11 +154,13 @@ def load(graph_dir: Path = GRAPH_DIR) -> tuple[list[dict], list[dict], list[str]
                 errors.append(f"{src}: invasiveness must be one of {sorted(INVASIVENESS)}")
         if "url" in n and not str(n["url"]).startswith(("http://", "https://")):
             errors.append(f"{src}: url must be http(s)")
+        if "tags" in n and not (isinstance(n["tags"], list) and all(isinstance(x, str) for x in n["tags"])):
+            errors.append(f"{src}: tags must be a list of strings")
         if "modalities" in n and not (isinstance(n["modalities"], list) and all(isinstance(m, str) for m in n["modalities"])):
             errors.append(f"{src}: modalities must be a list of modality ids")
             n["modalities"] = []
 
-    # `modalities: [eeg, meg]` on a project or device is shorthand for USES edges.
+    # `modalities: [eeg, meg]` on a project, device or org is shorthand for USES edges.
     for n in list(by_id.values()):
         for m in n.pop("modalities", []):
             edges.append({"from": n["id"], "type": "USES", "to": m, "_src": f"{n['_src']}.modalities"})
@@ -336,11 +341,26 @@ def bounties_markdown(nodes: list[dict], edges: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def check_repos(nodes: list[dict]) -> list[str]:
+    """Return the `repo` values that `git ls-remote` cannot reach (missing, renamed away or private)."""
+    missing = []
+    for n in nodes:
+        if n.get("repo"):
+            result = subprocess.run(
+                ["git", "ls-remote", "--exit-code", f"https://github.com/{n['repo']}", "HEAD"],
+                capture_output=True, timeout=60, env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+            )
+            if result.returncode != 0:
+                missing.append(f"{n['id']}: {n['repo']}")
+    return missing
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("validate", help="check the graph against the schema")
     sub.add_parser("bounties", help="print the ranked bounty board as Markdown")
+    sub.add_parser("check-repos", help="confirm every project repo exists on GitHub (needs network)")
     build = sub.add_parser("build", help="write the static site")
     build.add_argument("--out", default="dist", type=Path)
     args = parser.parse_args(argv)
@@ -357,6 +377,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "validate":
         verified = sum(e["status"] == "verified" for e in edges)
         print(f"ok: {len(nodes)} nodes, {len(edges)} edges ({verified} verified), {len(warnings)} warning(s)")
+    elif args.cmd == "check-repos":
+        missing = check_repos(nodes)
+        for m in missing:
+            print(f"not found: {m}", file=sys.stderr)
+        total = sum(1 for n in nodes if n.get("repo"))
+        print(f"{total - len(missing)} of {total} repos reachable")
+        return 1 if missing else 0
     elif args.cmd == "bounties":
         print(bounties_markdown(nodes, edges))
     elif args.cmd == "build":

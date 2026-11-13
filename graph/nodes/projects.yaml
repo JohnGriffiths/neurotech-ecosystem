@@ -67,14 +67,25 @@ nodes:
      description: "Python API for reading and writing NWB files."}
 
   # --- processing: MRI ---
-  - {id: fmriprep, repo: nipreps/fmriprep, layer: processing, modalities: [fmri], name: fMRIPrep,
+  - {id: fmriprep, repo: nipreps/fmriprep, layer: processing, modalities: [fmri, smri], name: fMRIPrep,
      description: "Robust preprocessing pipeline for fMRI data."}
   - {id: nilearn, repo: nilearn/nilearn, layer: processing, modalities: [fmri], name: Nilearn,
      description: "Statistics and machine learning for neuroimaging in Python."}
-  - {id: freesurfer, repo: freesurfer/freesurfer, layer: processing, modalities: [fmri], name: FreeSurfer,
+  - {id: freesurfer, repo: freesurfer/freesurfer, layer: processing, modalities: [smri, fmri], name: FreeSurfer,
      description: "Cortical surface reconstruction and structural MRI analysis."}
-  - {id: dcm2niix, repo: rordenlab/dcm2niix, layer: processing, modalities: [fmri], name: dcm2niix,
+  - {id: dcm2niix, repo: rordenlab/dcm2niix, layer: processing, modalities: [fmri, smri, dmri], name: dcm2niix,
      description: "Converts DICOM images to NIfTI with BIDS sidecars."}
+
+  - {id: fsl, layer: processing, modalities: [fmri, smri, dmri], name: FSL, url: "https://fsl.fmrib.ox.ac.uk",
+     description: "FMRIB Software Library: analysis tools for functional, structural and diffusion MRI."}
+  - {id: spm, repo: spm/spm, layer: processing, modalities: [fmri, smri, eeg, meg], name: SPM,
+     description: "Statistical Parametric Mapping: MATLAB software for fMRI, PET, EEG and MEG analysis."}
+  - {id: afni, repo: afni/afni, layer: processing, modalities: [fmri, smri], name: AFNI,
+     description: "Analysis of Functional NeuroImages: C, Python and R tools for MRI analysis."}
+  - {id: dipy, repo: dipy/dipy, layer: processing, modalities: [dmri], name: DIPY,
+     description: "Diffusion imaging in Python: reconstruction, tractography and analysis."}
+  - {id: cedalion, repo: ibs-lab/cedalion, layer: processing, modalities: [fnirs], name: Cedalion,
+     description: "Python toolbox for fNIRS and diffuse optical tomography analysis."}
 
   # --- neuromodulation ---
   - {id: simnibs, repo: simnibs/simnibs, layer: modelling, modalities: [tms, tes], name: SimNIBS,
@@ -89,7 +100,7 @@ nodes:
      description: "Whole-brain network simulation platform."}
 
   # --- machine learning and benchmarking ---
-  - {id: moabb, repo: NeuroTechX/moabb, layer: ml, modalities: [eeg], name: MOABB,
+  - {id: moabb, repo: NeuroTechX/moabb, layer: ml, modalities: [eeg], tags: [flagship], name: MOABB,
      description: "Mother of All BCI Benchmarks: reproducible benchmarking of BCI algorithms on open datasets."}
   - {id: braindecode, repo: braindecode/braindecode, layer: ml, modalities: [eeg, meg, ecog], name: Braindecode,
      description: "Deep learning toolbox for decoding raw electrophysiology data."}
@@ -97,13 +108,19 @@ nodes:
      description: "Riemannian-geometry machine learning for multivariate biosignals."}
 
   # --- experiment ---
-  - {id: eeg-expy, repo: NeuroTechX/EEG-ExPy, layer: experiment, modalities: [eeg], name: EEG-ExPy,
+  - {id: eeg-expy, repo: NeuroTechX/EEG-ExPy, layer: experiment, modalities: [eeg], tags: [flagship], name: EEG-ExPy,
      description: "Classic EEG experiments on consumer hardware (formerly eeg-notebooks)."}
   - {id: psychopy, repo: psychopy/psychopy, layer: experiment, name: PsychoPy,
      description: "Stimulus presentation and experiment control."}
 
+  # --- community ---
+  - {id: neurotechx-website, repo: NeuroTechX/neurotechx.github.io, layer: community, tags: [flagship], name: NeuroTechX website,
+     description: "The NeuroTechX community website."}
+  - {id: awesome-bci, kind: resource, repo: NeuroTechX/awesome-bci, layer: community, modalities: [eeg], name: Awesome BCI,
+     description: "Curated list of brain-computer interface software, hardware, datasets and learning resources."}
+
   # --- standards and formats ---
-  - {id: bids, kind: standard, repo: bids-standard/bids-specification, layer: standard, modalities: [fmri, eeg, meg, seeg, ecog, fnirs], name: BIDS,
+  - {id: bids, kind: standard, repo: bids-standard/bids-specification, layer: standard, modalities: [fmri, smri, dmri, eeg, meg, seeg, ecog, fnirs], name: BIDS,
      description: "Brain Imaging Data Structure: standard for organising neuroimaging and electrophysiology datasets."}
   - {id: nwb, kind: standard, repo: NeurodataWithoutBorders/nwb-schema, layer: standard, modalities: [intracortical], name: NWB,
      description: "Neurodata Without Borders: data standard for neurophysiology."}

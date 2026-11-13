@@ -26,7 +26,20 @@ edges:
   - {from: neuronetics, to: neurostar-tms}
   - {from: brainsway, to: brainsway-deep-tms}
   - {from: flow-neuroscience, to: flow-fl100}
+  - {from: paradromics, to: connexus}
+  - {from: nirx, to: nirsport2}
+  - {from: mendi, to: mendi-headband}
+  - {from: meta, to: meta-neural-band}
   # projects, by organisation
+  - {from: neurotechx, to: neurotechx-website}
+  - {from: neurotechx, to: awesome-bci}
+  - {from: fmrib, to: fsl}
+  - {from: fil, to: spm}
+  - {from: nimh, to: afni}
+  - {from: martinos-center, to: freesurfer}
+  - {from: ibs-lab, to: cedalion}
+  - {from: dipy-dev, to: dipy}
+  - {from: nilearn-dev, to: nilearn}
   - {from: openbci, to: openbci-gui}
   - {from: neurosity, to: neurosity-sdk}
   - {from: mentalab, to: explorepy}

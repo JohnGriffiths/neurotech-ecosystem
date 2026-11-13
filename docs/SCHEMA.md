@@ -11,9 +11,9 @@ Every node has `id` (unique, `lowercase-kebab-case`, never renamed once merged),
 
 | Type | What it is | Extra fields |
 |---|---|---|
-| `project` | **The main entity.** Almost always a GitHub repository. | `repo: owner/name`; `kind`: `software`, `hardware`, `dataset`, `standard`; `layer`; `status`: `exists` (default) or `proposed`; `modalities` |
+| `project` | **The main entity.** Almost always a GitHub repository. | `repo: owner/name`; `kind`: `software`, `hardware`, `dataset`, `standard`, `resource`; `layer`; `status`: `exists` (default) or `proposed`; `modalities` |
 | `device` | A hardware product. | `modalities` |
-| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator` |
+| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator`; `modalities` |
 | `person` | Someone with a public role on a project or organisation. | `github` (optional handle) |
 | `modality` | A technology: EEG, MEG, fMRI, DBS, TMS… | `class`: `sensing`, `modulating` or `[sensing, modulating]`; `invasiveness`: `invasive` or `noninvasive` |
 | `indication` | A condition that clinical neurotechnology diagnoses or treats. | |
@@ -23,8 +23,11 @@ Notes:
 
 - A project that exists must have a `repo`, or a `url` if it is not on GitHub.
 - `layer` is one of `acquisition`, `streaming`, `processing`, `modelling`, `ml`, `experiment`, `data`,
-  `standard`, `hardware`.
-- `modalities: [eeg, meg]` on a project or device is shorthand: each entry becomes a `USES` edge.
+  `standard`, `hardware`, `community`.
+- `modalities: [eeg, meg]` on a project, device or org is shorthand: each entry becomes a `USES` edge.
+  Put it on an org when you know what the organisation works with but have not yet added its devices.
+- `tags` are free-form. `flagship` marks the NeuroTechX flagship projects.
+- `python tools/ntgraph.py check-repos` confirms that every `repo` is reachable on GitHub.
 - A `proposed` project is one that should exist but does not. It appears on the gaps board.
 
 ## Edges
@@ -37,7 +40,7 @@ Files in `graph/edges/*.yaml`, same `defaults` mechanism. An edge is `{from, typ
 | `AFFILIATED_WITH` | person, org → org | Member of; or a lab within a university |
 | `DEPENDS_ON` | project → project | Cannot function without it |
 | `INTEGRATES_WITH` | project → project, device | Reads from, writes to or drives it |
-| `USES` | project, device → modality | Works with this technology |
+| `USES` | project, device, org → modality | Works with this technology |
 | `INDICATED_FOR` | device, modality, project → indication | Diagnoses or treats it. Requires `stage: approved` or `investigational`. |
 | `ADDRESSES` | project → problem | Covers the problem. Requires `coverage: partial` or `full`. |
 | `REALLY_WANTS` | org, person, project → problem, proposed project | Would benefit materially if this were solved or existed |

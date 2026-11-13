@@ -21,7 +21,7 @@ const TYPES = {
   problem:    { label: "Gaps",         color: "magenta", shape: "diamond",  base: 4.5 },
 };
 const KIND_LABEL = {
-  software: "Software project", hardware: "Hardware project", dataset: "Dataset or archive", standard: "Standard",
+  software: "Software project", hardware: "Hardware project", resource: "Resource list", dataset: "Dataset or archive", standard: "Standard",
   company: "Company", university: "University", institute: "Institute", lab: "Lab", oss_team: "Open-source team",
   community: "Community", standards_body: "Standards body", regulator: "Regulator",
   bottleneck: "Gap", capability: "Capability",
@@ -260,7 +260,7 @@ function renderDetail() {
   const cap = (s) => s[0].toUpperCase() + s.slice(1);
   const chips = [
     ...(n.type === "problem" ? [] : [...f.class.map(cap), ...f.invasiveness.map(cap)]),
-    f.clinical && n.type !== "problem" && "Clinical", n.layer && cap(n.layer), n.status === "proposed" && "Proposed",
+    f.clinical && n.type !== "problem" && "Clinical", n.layer && cap(n.layer), n.status === "proposed" && "Proposed", ...(n.tags || []).map(cap),
   ].filter(Boolean);
   const repo = n.repo
     ? el("a", { className: "repo", href: `https://github.com/${n.repo}`, target: "_blank", rel: "noopener" })

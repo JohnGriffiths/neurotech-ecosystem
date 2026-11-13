@@ -46,6 +46,7 @@ python -m http.server -d dist      # http://localhost:8000
 ```
 python tools/ntgraph.py validate     # check the graph
 python tools/ntgraph.py bounties     # ranked gaps as a Markdown table
+python tools/ntgraph.py check-repos  # confirm every project repo exists on GitHub
 python -m pytest                     # tests
 ```
 

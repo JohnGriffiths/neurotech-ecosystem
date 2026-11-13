@@ -7,6 +7,10 @@ edges:
   - {from: poldrack-lab, to: stanford}
   - {from: temple-nedc, to: temple-university}
   - {from: mit-lcp, to: mit}
+  - {from: fmrib, to: university-of-oxford}
+  - {from: fil, to: ucl}
+  - {from: ibs-lab, to: tu-berlin}
+  - {from: egi, to: magstim}
   # people
   - {from: alexandre-gramfort, to: mne-tools}
   - {from: eric-larson, to: mne-tools}

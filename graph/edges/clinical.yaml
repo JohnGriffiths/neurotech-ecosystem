@@ -20,6 +20,7 @@ edges:
   - {from: utah-array, to: paralysis, stage: investigational}
   - {from: neuralink-n1, to: paralysis, stage: investigational}
   - {from: stentrode, to: paralysis, stage: investigational}
+  - {from: connexus, to: paralysis, stage: investigational}
   # modality-level, diagnostic
   - {from: eeg, to: epilepsy, stage: approved, note: "Diagnosis and monitoring."}
   - {from: seeg, to: epilepsy, stage: approved, note: "Presurgical localisation of the seizure onset zone."}

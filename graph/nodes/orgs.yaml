@@ -26,7 +26,69 @@ nodes:
   - {id: catalystneuro, kind: company, name: CatalystNeuro, url: "https://www.catalystneuro.com",
      description: "Consultancy building neurophysiology data standardisation tools."}
 
+  - {id: nirx, kind: company, modalities: [fnirs], name: NIRx, url: "https://nirx.net",
+     description: "Research fNIRS systems."}
+  - {id: ant-neuro, kind: company, modalities: [eeg], name: ANT Neuro, url: "https://www.ant-neuro.com",
+     description: "Research and clinical EEG systems."}
+  - {id: egi, kind: company, modalities: [eeg], name: EGI (Electrical Geodesics), url: "https://www.egi.com",
+     description: "High-density EEG nets and amplifiers; now part of Magstim."}
+  - {id: meta, kind: company, modalities: [emg], name: Meta, url: "https://www.meta.com",
+     description: "Reality Labs develops wrist-worn surface EMG neural interfaces."}
+  - {id: siemens-healthineers, kind: company, modalities: [fmri, smri, dmri], name: Siemens Healthineers, url: "https://www.siemens-healthineers.com",
+     description: "MRI scanner manufacturer."}
+  - {id: ge-healthcare, kind: company, modalities: [fmri, smri, dmri], name: GE HealthCare, url: "https://www.gehealthcare.com",
+     description: "MRI scanner manufacturer."}
+  - {id: divergence-neuro, kind: company, modalities: [eeg], name: Divergence Neuro, url: "https://www.divergenceneuro.com",
+     description: "Toronto company with a cloud platform for remote and in-clinic neurofeedback."}
+  - {id: synchroni, kind: company, modalities: [eeg, emg], name: Synchroni,
+     description: "Wireless EEG and EMG sensor line associated with OYMotion."}
+  - {id: mendi, kind: company, modalities: [fnirs], name: Mendi, url: "https://www.mendi.io",
+     description: "Consumer fNIRS neurofeedback headband."}
+  - {id: elemind, kind: company, modalities: [eeg], name: Elemind, url: "https://elemindtech.com",
+     description: "EEG headband that delivers sound timed to brain rhythms for sleep."}
+  - {id: beacon-biosignals, kind: company, modalities: [eeg], name: Beacon Biosignals, url: "https://beacon.bio",
+     description: "EEG analytics for clinical trials; maker of the Dreem sleep headband."}
+  # from the NeuroTechX awesome-bci hardware list
+  - {id: neurable, kind: company, modalities: [eeg], name: Neurable, url: "https://www.neurable.com",
+     description: "EEG sensing built into headphones."}
+  - {id: idun, kind: company, modalities: [eeg], name: IDUN Technologies, url: "https://iduntechnologies.com",
+     description: "In-ear EEG."}
+  - {id: brainbit, kind: company, modalities: [eeg], name: BrainBit, url: "https://brainbit.com",
+     description: "EEG headbands and SDK."}
+  - {id: cgx, kind: company, modalities: [eeg], name: CGX, url: "https://cgxsystems.com",
+     description: "Research-grade dry-electrode EEG systems (formerly Cognionics)."}
+  - {id: neurosky, kind: company, modalities: [eeg], name: NeuroSky, url: "https://neurosky.com",
+     description: "Single-channel consumer EEG."}
+  - {id: wearable-sensing, kind: company, modalities: [eeg], name: Wearable Sensing, url: "https://wearablesensing.com",
+     description: "Dry-electrode EEG systems."}
+  - {id: biosemi, kind: company, modalities: [eeg], name: BioSemi, url: "https://www.biosemi.com",
+     description: "Research EEG systems."}
+  - {id: brain-products, kind: company, modalities: [eeg], name: Brain Products, url: "https://www.brainproducts.com",
+     description: "Research EEG amplifiers and caps."}
+  - {id: advanced-brain-monitoring, kind: company, modalities: [eeg], name: Advanced Brain Monitoring, url: "https://www.advancedbrainmonitoring.com",
+     description: "Wireless EEG systems."}
+  - {id: natus, kind: company, modalities: [eeg], name: Natus, url: "https://natus.com",
+     description: "Clinical neurodiagnostic systems."}
+  - {id: tmsi, kind: company, modalities: [eeg, emg], name: TMSi, url: "https://www.tmsi.artinis.com",
+     description: "EEG and EMG amplifiers."}
+  - {id: artinis, kind: company, modalities: [fnirs], name: Artinis Medical Systems, url: "https://www.artinis.com",
+     description: "fNIRS systems."}
+  - {id: cortivision, kind: company, modalities: [fnirs], name: Cortivision, url: "https://www.cortivision.com",
+     description: "fNIRS systems."}
+
   # --- companies: implants and clinical neuromodulation ---
+  - {id: paradromics, kind: company, name: Paradromics, url: "https://www.paradromics.com",
+     description: "High-channel-count intracortical brain-computer interfaces."}
+  - {id: magventure, kind: company, modalities: [tms], name: MagVenture, url: "https://www.magventure.com",
+     description: "TMS systems for research and therapy."}
+  - {id: magstim, kind: company, modalities: [tms], name: Magstim, url: "https://www.magstim.com",
+     description: "TMS systems; owner of EGI."}
+  - {id: rogue-research, kind: company, modalities: [tms], name: Rogue Research, url: "https://www.rogue-research.com",
+     description: "Maker of the Brainsight neuronavigation system."}
+  - {id: soterix-medical, kind: company, modalities: [tes], name: Soterix Medical, url: "https://www.soterixmedical.com",
+     description: "tDCS and tACS systems."}
+  - {id: boston-scientific, kind: company, modalities: [dbs, scs], name: Boston Scientific, url: "https://www.bostonscientific.com",
+     description: "Medical device maker; DBS and spinal cord stimulation systems."}
   - {id: medtronic, kind: company, name: Medtronic, url: "https://www.medtronic.com",
      description: "Medical device maker; DBS and other neuromodulation systems."}
   - {id: abbott, kind: company, name: Abbott, url: "https://www.abbott.com",
@@ -63,7 +125,20 @@ nodes:
   - {id: child-mind-institute, kind: institute, name: Child Mind Institute, url: "https://childmind.org",
      description: "Runs the Healthy Brain Network data collection."}
 
+  - {id: university-of-oxford, kind: university, name: University of Oxford, url: "https://www.ox.ac.uk", description: "Oxford, UK."}
+  - {id: ucl, kind: university, name: University College London, url: "https://www.ucl.ac.uk", description: "London, UK."}
+  - {id: tu-berlin, kind: university, name: TU Berlin, url: "https://www.tu.berlin", description: "Berlin, Germany."}
+  - {id: nimh, kind: institute, name: National Institute of Mental Health, url: "https://www.nimh.nih.gov", description: "US National Institutes of Health institute; home of AFNI."}
+
   # --- labs ---
+  - {id: fmrib, kind: lab, name: FMRIB (Oxford), url: "https://www.win.ox.ac.uk",
+     description: "Oxford centre for brain MRI; home of FSL."}
+  - {id: fil, kind: lab, name: Functional Imaging Laboratory (UCL), url: "https://www.fil.ion.ucl.ac.uk",
+     description: "Home of SPM."}
+  - {id: martinos-center, kind: lab, name: Martinos Center for Biomedical Imaging, url: "https://www.martinos.org",
+     description: "Home of FreeSurfer."}
+  - {id: ibs-lab, kind: lab, name: Intelligent Biomedical Sensing Lab, url: "https://ibs-lab.com",
+     description: "Develops Cedalion."}
   - {id: sccn, kind: lab, name: Swartz Center for Computational Neuroscience, url: "https://sccn.ucsd.edu",
      description: "Home of EEGLAB, Lab Streaming Layer and NEMAR."}
   - {id: donders, kind: lab, name: Donders Institute, url: "https://www.ru.nl/donders",
@@ -94,6 +169,10 @@ nodes:
      description: "Maintainers of Timeflux."}
   - {id: open-science-tools, kind: oss_team, name: Open Science Tools, url: "https://opensciencetools.org",
      description: "Maintainers of PsychoPy."}
+  - {id: nilearn-dev, kind: oss_team, name: Nilearn developers, url: "https://github.com/nilearn",
+     description: "Maintainers of Nilearn."}
+  - {id: dipy-dev, kind: oss_team, name: DIPY developers, url: "https://github.com/dipy",
+     description: "Maintainers of DIPY."}
   - {id: nipreps, kind: oss_team, name: NiPreps, url: "https://www.nipreps.org",
      description: "Community maintaining fMRIPrep and related preprocessing pipelines."}
   - {id: dandi-team, kind: oss_team, name: DANDI team, url: "https://dandiarchive.org",

@@ -22,6 +22,11 @@ edges:
   - {from: neuroconv, type: DEPENDS_ON, to: pynwb}
   - {from: fmriprep, type: DEPENDS_ON, to: freesurfer}
   - {from: fmriprep, type: DEPENDS_ON, to: nilearn}
+  - {from: fmriprep, type: DEPENDS_ON, to: fsl}
+  - {from: fmriprep, type: DEPENDS_ON, to: afni}
+  - {from: lead-dbs, type: DEPENDS_ON, to: spm}
+  - {from: opennft, type: DEPENDS_ON, to: spm}
+  - {from: spm, type: DEPENDS_ON, to: fieldtrip}
   - {from: dandi-archive, type: DEPENDS_ON, to: nwb}
   - {from: openneuro, type: DEPENDS_ON, to: bids}
   - {from: nemar, type: DEPENDS_ON, to: openneuro}
@@ -59,6 +64,8 @@ edges:
   - {from: mne-python, type: INTEGRATES_WITH, to: snirf}
   - {from: mne-python, type: INTEGRATES_WITH, to: freesurfer}
   - {from: homer3, type: INTEGRATES_WITH, to: snirf}
+  - {from: cedalion, type: INTEGRATES_WITH, to: snirf}
+  - {from: brainstorm, type: INTEGRATES_WITH, to: spm}
   - {from: mne-bids, type: INTEGRATES_WITH, to: bids}
   - {from: eeglab, type: INTEGRATES_WITH, to: bids}
   - {from: fieldtrip, type: INTEGRATES_WITH, to: bids}

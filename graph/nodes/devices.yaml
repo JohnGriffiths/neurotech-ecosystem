@@ -29,7 +29,16 @@ nodes:
   - {id: starstim, modalities: [tes, eeg], name: Neuroelectrics Starstim, url: "https://www.neuroelectrics.com",
      description: "Combined multichannel tES and EEG headset."}
 
+  - {id: nirsport2, modalities: [fnirs], name: NIRx NIRSport2, url: "https://nirx.net",
+     description: "Wearable research fNIRS system."}
+  - {id: mendi-headband, modalities: [fnirs], name: Mendi headband, url: "https://www.mendi.io",
+     description: "Consumer fNIRS neurofeedback headband."}
+  - {id: meta-neural-band, modalities: [emg], name: Meta Neural Band, url: "https://www.meta.com",
+     description: "Wrist-worn surface EMG input device."}
+
   # --- implanted BCI ---
+  - {id: connexus, modalities: [intracortical], name: Paradromics Connexus, url: "https://www.paradromics.com",
+     description: "High-data-rate intracortical brain-computer interface."}
   - {id: utah-array, modalities: [intracortical], name: Blackrock Utah array, url: "https://blackrockneurotech.com",
      description: "Penetrating microelectrode array used in most human intracortical BCI studies."}
   - {id: neuralink-n1, modalities: [intracortical], name: Neuralink N1, url: "https://neuralink.com",
