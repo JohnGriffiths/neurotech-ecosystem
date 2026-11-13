@@ -1,0 +1,16 @@
+# Vendored libraries
+
+Checked in so the viewer works offline and from a plain static host.
+
+| File | What | Licence |
+|---|---|---|
+| `force-graph.min.js` | [force-graph](https://github.com/vasturiano/force-graph) 1.52.0, the 2D view | MIT (`force-graph.LICENSE`) |
+| `graph3d.min.js` | [3d-force-graph](https://github.com/vasturiano/3d-force-graph) 1.80.2, [three](https://github.com/mrdoob/three.js) 0.187.0 and [three-spritetext](https://github.com/vasturiano/three-spritetext) 1.10.0 in one bundle, the 3D view | MIT |
+| `fonts/orbitron-*.woff2` | [Orbitron](https://github.com/theleagueof/orbitron) | OFL 1.1 (`fonts/orbitron.LICENSE`) |
+
+To rebuild `graph3d.min.js`:
+
+```
+npm install 3d-force-graph@1.80.2 three@0.187.0 three-spritetext@1.10.0 esbuild
+npx esbuild graph3d.entry.js --bundle --minify --format=iife --legal-comments=none --outfile=graph3d.min.js
+```

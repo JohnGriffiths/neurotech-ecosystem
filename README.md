@@ -27,6 +27,9 @@ python tools/ntgraph.py build
 python -m http.server -d dist      # http://localhost:8000
 ```
 
+- The network opens in 3D: drag to rotate, scroll to zoom, right-drag to pan. It spins slowly until you
+  take hold of it. Switch to a flat 2D layout with the toggle at the bottom; 2D is also the fallback where
+  WebGL is unavailable.
 - Click a node for its details, repository link and connections. Hover to light up its neighbourhood.
 - Colour the network by entity type, by sensing versus modulating, or by invasiveness.
 - Filter by entity type, class, invasiveness, a single technology, or clinical only.
@@ -39,7 +42,7 @@ python -m http.server -d dist      # http://localhost:8000
 | `graph/nodes/` | Projects, devices, organisations, people, technologies, indications, gaps |
 | `graph/edges/` | Relationships; `gaps.yaml` holds the project-generating ones |
 | `tools/ntgraph.py` | Validator, gap ranking and static site build |
-| `web/` | The viewer. `vendor/` holds [force-graph](https://github.com/vasturiano/force-graph) (MIT) and the Orbitron font (OFL). The logo, favicon and colour scheme come from the original NeuroTechX website and belong to NeuroTechX. |
+| `web/` | The viewer. `vendor/` holds the 2D and 3D graph libraries (MIT) and the Orbitron font (OFL); see `web/vendor/README.md`. The logo, favicon and colour scheme come from the original NeuroTechX website and belong to NeuroTechX. |
 | `docs/SCHEMA.md` | Node and edge types, verification rules, scoring |
 | `docs/rfcs/` | Project proposals derived from the graph |
 

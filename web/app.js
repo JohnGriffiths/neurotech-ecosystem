@@ -49,9 +49,9 @@ const LINK_DISTANCE = { USES: 90, AFFILIATED_WITH: 30, MAINTAINS: 38 };
 
 const state = {
   lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false,
-  selected: null, hovered: null, highlight: null,
+  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true,
 };
-let graph, byId, fg, C = {}, adjacency = {}, allLinks = [];
+let graph, byId, view = null, C = {}, adjacency = {}, allLinks = [];
 
 // ------------------------------------------------------------------ colour ---
 function readTheme() {
@@ -156,11 +156,12 @@ function linkLit(l) {
   return focus && (endId(l.source) === focus || endId(l.target) === focus);
 }
 function linkColor(l) {
+  const k = state.mode === "3d" ? 2 : 1; // 1px WebGL lines read fainter than canvas strokes
   if (linkLit(l)) return l.type === "REALLY_WANTS" ? C.magenta : C["link-hi"];
-  if (state.highlight) return alpha(C.link, 0.04);
+  if (state.highlight) return alpha(C.link, 0.04 * k);
   if (l.type === "REALLY_WANTS") return alpha(C.magenta, 0.55);
-  if (l.type === "USES") return alpha(C.link, 0.09);
-  return C.link;
+  if (l.type === "USES") return alpha(C.link, 0.09 * k);
+  return alpha(C.link, 0.17 * k);
 }
 
 // ----------------------------------------------------------------- filters ---
@@ -176,7 +177,8 @@ function applyFilters() {
   const nodes = graph.nodes.filter(passes);
   const ids = new Set(nodes.map((n) => n.id));
   const links = allLinks.filter((l) => ids.has(endId(l.source)) && ids.has(endId(l.target)));
-  fg.graphData({ nodes, links });
+  view.setData({ nodes, links });
+  state.touched = false;
   if (state.selected && !ids.has(state.selected)) select(null);
   const verified = graph.edges.filter((e) => e.status === "verified").length;
   $("#stats").textContent = `${nodes.length} of ${graph.nodes.length} entities · ${links.length} links · ${verified} of ${graph.edges.length} verified`;
@@ -228,6 +230,7 @@ function neighbourhood(id) {
 function refreshHighlight() {
   const focus = state.hovered || state.selected;
   state.highlight = focus ? neighbourhood(focus) : null;
+  if (view) view.restyle();
 }
 function select(id, { fly = false } = {}) {
   if (id && !passes(byId[id])) { resetFilters(); applyFilters(); }
@@ -237,8 +240,8 @@ function select(id, { fly = false } = {}) {
   try { history.replaceState(null, "", id ? `#${id}` : location.pathname + location.search); } catch (e) { /* file:// */ }
   if (id && fly) {
     showView("network");
-    const n = byId[id];
-    if (Number.isFinite(n.x)) { fg.centerAt(n.x, n.y, 700); fg.zoom(Math.max(fg.zoom(), 2), 700); }
+    if (state.rotate) setRotate(false);
+    if (Number.isFinite(byId[id].x)) view.focus(byId[id]);
   }
 }
 
@@ -356,7 +359,244 @@ function bindSearch() {
   input.addEventListener("blur", close);
 }
 
-// -------------------------------------------------------------------- init ---
+// --------------------------------------------------------------- renderers ---
+// Two interchangeable views of the same data: { fg, setData, restyle, focus, fit, resize, destroy }.
+
+/** Gentle pull to the centre so disconnected clusters stay in frame. */
+function gravityForce(k, dims) {
+  let nodes = [];
+  const force = (a) => nodes.forEach((n) => {
+    n.vx -= n.x * k * a; n.vy -= n.y * k * a;
+    if (dims === 3) n.vz -= n.z * k * a;
+  });
+  force.initialize = (ns) => { nodes = ns; };
+  return force;
+}
+
+function commonSetup(fg, dims) {
+  fg.nodeId("id")
+    .nodeLabel((n) => `${esc(n.name)}<small>${esc(typeLabel(n))}</small>`)
+    .linkColor(linkColor)
+    .linkDirectionalArrowRelPos(1)
+    .linkDirectionalParticles((l) => (linkLit(l) ? 2 : 0))
+    .linkDirectionalParticleSpeed(0.007)
+    .linkDirectionalParticleColor((l) => (l.type === "REALLY_WANTS" ? C.magenta : C.text))
+    .d3VelocityDecay(0.32)
+    .onNodeHover((n) => { state.hovered = n ? n.id : null; refreshHighlight(); $("#graph").style.cursor = n ? "pointer" : ""; })
+    .onNodeClick((n) => select(n.id, { fly: true }))
+    .onBackgroundClick(() => select(null));
+  fg.d3Force("gravity", gravityForce(dims === 3 ? 0.06 : 0.075, dims));
+  fg.d3Force("link").distance((l) => LINK_DISTANCE[l.type] || 60);
+  return fg;
+}
+
+function make2d(container) {
+  const fg = commonSetup(new ForceGraph(container), 2)
+    .backgroundColor("rgba(0,0,0,0)")
+    .nodeVal((n) => n.r * n.r)
+    .nodeCanvasObject(drawNode)
+    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 3, 0, 2 * Math.PI); ctx.fill(); })
+    .linkWidth((l) => (linkLit(l) ? 1.6 : l.type === "REALLY_WANTS" ? 1.1 : 0.6))
+    .linkLineDash((l) => (l.type === "REALLY_WANTS" ? [3, 2.5] : null))
+    .linkDirectionalArrowLength((l) => (linkLit(l) ? 4.5 : l.type === "USES" ? 0 : 2.2))
+    .linkDirectionalParticleWidth(2.6)
+    .autoPauseRedraw(false)
+    .warmupTicks(140).cooldownTicks(260);
+  fg.d3Force("charge").strength(-260).distanceMax(600);
+  return {
+    fg,
+    setData: (d) => fg.graphData(d),
+    restyle: () => {}, // the canvas redraws from state every frame
+    focus: (n) => { fg.centerAt(n.x, n.y, 700); fg.zoom(Math.max(fg.zoom(), 2), 700); },
+    fit: (ms) => fg.zoomToFit(ms, window.innerWidth < 820 ? 30 : 70),
+    resize: () => fg.width(window.innerWidth).height(window.innerHeight),
+    setRotate: () => {},
+    destroy: () => { fg._destructor(); container.replaceChildren(); },
+  };
+}
+
+function make3d(container) {
+  const { ForceGraph3D, SpriteText, THREE: T } = window.NTX3D;
+  // Solid counterparts of the 2D glyphs: sphere, cube, faceted gem, pyramid, octahedron.
+  const geometry = {
+    circle: new T.SphereGeometry(1, 24, 16), square: new T.BoxGeometry(1.5, 1.5, 1.5),
+    hexagon: new T.IcosahedronGeometry(1.2, 0), triangle: new T.ConeGeometry(1.15, 1.9, 4),
+    diamond: new T.OctahedronGeometry(1.3),
+  };
+  geometry["triangle-down"] = geometry.triangle;
+
+  const canvasTexture = (w, h, paint) => {
+    const c = Object.assign(document.createElement("canvas"), { width: w, height: h });
+    paint(c.getContext("2d"));
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t;
+  };
+  const stripes = new Map();
+  /** Two-colour texture for an entity that spans both values of the active lens. */
+  const striped = (a, b) => {
+    const key = a + b;
+    if (!stripes.has(key)) {
+      stripes.set(key, canvasTexture(256, 2, (ctx) => [a, b, a, b].forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(i * 64, 0, 64, 2); })));
+    }
+    return stripes.get(key);
+  };
+  const haloTexture = canvasTexture(128, 128, (ctx) => {
+    const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(255,255,255,.75)"); g.addColorStop(0.35, "rgba(255,255,255,.22)"); g.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 128, 128);
+  });
+
+  function build(n) {
+    const hollow = isHollow(n);
+    const material = hollow
+      ? new T.MeshBasicMaterial({ wireframe: true, transparent: true })
+      : new T.MeshLambertMaterial({ transparent: true });
+    const mesh = new T.Mesh(geometry[TYPES[n.type].shape], material);
+    mesh.scale.setScalar(n.r * 0.85);
+    if (TYPES[n.type].shape === "triangle-down") mesh.rotation.x = Math.PI;
+    const group = new T.Group(); group.add(mesh);
+    n.__o = { group, mesh, hollow, label: null, holder: null, halo: null, map: null };
+    style(n);
+    return group;
+  }
+
+  function style(n) {
+    const o = n.__o;
+    if (!o) return;
+    const colors = nodeColors(n), lit = isLit(n);
+    const focus = n.id === state.selected || n.id === state.hovered;
+    const m = o.mesh.material, r = n.r * 0.85;
+    const map = colors[1] && !o.hollow ? striped(colors[0], colors[1]) : null;
+    if (map !== o.map) { m.map = map; o.map = map; m.needsUpdate = true; }
+    m.color.set(map ? "#ffffff" : colors[0]);
+    m.opacity = lit ? 1 : 0.06; m.depthWrite = lit;
+
+    const strong = focus || n.type === "modality";
+    const wanted = lit && (strong || !!state.highlight || n.hub);
+    if (wanted && !o.label) {
+      o.label = new SpriteText(n.name, 4);
+      Object.assign(o.label, { fontFace: "ui-sans-serif, system-ui, sans-serif", strokeWidth: 1.5, padding: 1 });
+      o.label.material.depthWrite = false; o.label.renderOrder = 2;
+      o.holder = new T.Group(); o.holder.add(o.label); // scaled each frame to keep the text legible
+      o.group.add(o.holder);
+    }
+    if (o.label) {
+      o.label.visible = wanted;
+      if (wanted) {
+        const want = { color: strong ? C.text : C["text-2"], strokeColor: C.bg, textHeight: focus ? 5.4 : 4, fontWeight: strong ? "600" : "400" };
+        for (const [k, v] of Object.entries(want)) if (o.label[k] !== v) o.label[k] = v; // each set re-rasterises
+        o.gap = r * 1.35; o.rise = want.textHeight * 0.85;
+      }
+    }
+    if (focus && !o.halo) {
+      o.halo = new T.Sprite(new T.SpriteMaterial({ map: haloTexture, blending: T.AdditiveBlending, depthWrite: false, transparent: true }));
+      o.halo.scale.setScalar(r * 7); o.halo.raycast = () => {};
+      o.group.add(o.halo);
+    }
+    if (o.halo) { o.halo.visible = focus; o.halo.material.color.set(colors[0]); }
+  }
+
+  const fg = commonSetup(new ForceGraph3D(container, { controlType: "orbit", rendererConfig: { antialias: true, alpha: true } }), 3)
+    .backgroundColor("rgba(0,0,0,0)").showNavInfo(false)
+    .nodeThreeObject(build)
+    .linkOpacity(1)
+    .linkWidth((l) => (linkLit(l) ? 0.5 : 0))
+    .linkDirectionalArrowLength((l) => (linkLit(l) ? 4 : 0))
+    .linkDirectionalParticleWidth(1.6)
+    .warmupTicks(120).cooldownTicks(240);
+  fg.d3Force("charge").strength(-150).distanceMax(500);
+  const controls = fg.controls();
+  Object.assign(controls, { enableDamping: true, dampingFactor: 0.12, autoRotateSpeed: 0.6, autoRotate: state.rotate });
+  const fog = fg.scene().fog = new T.Fog(C.bg, 1, 4000); // depth cue: far nodes fade into the background
+  let radius = 400, alive = true;
+
+  // Per frame: fog tracks the camera, and labels grow with distance so they stay about 12px on screen.
+  (function frame() {
+    if (!alive) return;
+    requestAnimationFrame(frame);
+    const cam = fg.camera().position;
+    const d = Math.hypot(cam.x, cam.y, cam.z);
+    fog.near = Math.max(1, d - radius); fog.far = d + radius * 3.5;
+    for (const n of fg.graphData().nodes) {
+      const o = n.__o;
+      if (!o || !o.label || !o.label.visible || !Number.isFinite(n.x)) continue;
+      const k = Math.min(6, Math.max(1, Math.hypot(cam.x - n.x, cam.y - n.y, cam.z - n.z) / 420));
+      o.holder.scale.setScalar(k);
+      o.label.position.y = -(o.gap / k + o.rise);
+    }
+  })();
+
+  return {
+    fg,
+    setData: (d) => fg.graphData(d),
+    restyle: () => {
+      fog.color.set(C.bg);
+      fg.graphData().nodes.forEach(style);
+      // Re-setting an accessor makes the library re-evaluate it for every link.
+      fg.linkColor(fg.linkColor()).linkWidth(fg.linkWidth())
+        .linkDirectionalArrowLength(fg.linkDirectionalArrowLength()).linkDirectionalParticles(fg.linkDirectionalParticles());
+    },
+    focus: (n) => {
+      const d = Math.hypot(n.x, n.y, n.z) || 1, k = 1 + 300 / d;
+      fg.cameraPosition({ x: n.x * k, y: n.y * k, z: n.z * k }, n, 900);
+    },
+    fit: (ms) => {
+      // Frame the bounding sphere of the laid-out nodes, keeping the current viewing direction.
+      const nodes = fg.graphData().nodes.filter((n) => Number.isFinite(n.x));
+      if (!nodes.length) return;
+      radius = Math.max(60, ...nodes.map((n) => Math.hypot(n.x, n.y, n.z) + n.r));
+      const cam = fg.camera();
+      const vertical = (cam.fov * Math.PI) / 360;
+      const half = Math.min(vertical, Math.atan(Math.tan(vertical) * cam.aspect));
+      const dist = (radius / Math.sin(half)) * 0.92;
+      const p = cam.position, len = Math.hypot(p.x, p.y, p.z) || 1;
+      fg.cameraPosition({ x: (p.x / len) * dist, y: (p.y / len) * dist, z: (p.z / len) * dist }, { x: 0, y: 0, z: 0 }, ms);
+    },
+    resize: () => fg.width(window.innerWidth).height(window.innerHeight),
+    setRotate: (on) => { controls.autoRotate = on; },
+    destroy: () => { alive = false; fg._destructor(); container.replaceChildren(); },
+  };
+}
+
+function webglAvailable() {
+  try { return !!document.createElement("canvas").getContext("webgl2"); } catch (e) { return false; }
+}
+function setRotate(on) {
+  state.rotate = on;
+  $("#rotate").setAttribute("aria-pressed", String(on));
+  if (view) view.setRotate(on);
+}
+
+/** (Re)create the network in 2D or 3D, falling back to 2D where WebGL is missing. */
+function mount(mode) {
+  const container = $("#graph");
+  if (view) view.destroy();
+  graph.nodes.forEach((n) => { for (const k of ["x", "y", "z", "vx", "vy", "vz", "fx", "fy", "fz", "__o"]) delete n[k]; });
+  state.hovered = null;
+  view = null;
+  if (mode === "3d" && window.NTX3D && webglAvailable()) {
+    try { state.mode = "3d"; view = make3d(container); } catch (e) { console.warn("3D view unavailable, using 2D", e); container.replaceChildren(); }
+  }
+  if (!view) { state.mode = "2d"; view = make2d(container); }
+  view.resize();
+  refreshHighlight();
+  applyFilters();
+  setSeg("#dims", state.mode);
+  document.body.dataset.mode = state.mode;
+  // Frame the graph once the first layout pass has produced positions, then again when it settles.
+  const mine = view;
+  let frames = 0;
+  state.touched = false;
+  (function whenLaidOut() {
+    if (view !== mine) return;
+    const nodes = view.fg.graphData().nodes;
+    if (!nodes.length || !Number.isFinite(nodes[0].x) || ++frames < 5) { requestAnimationFrame(whenLaidOut); return; }
+    view.fit(0);
+    const start = state.selected || location.hash.slice(1);
+    if (byId[start]) select(start, { fly: true });
+  })();
+  view.fg.onEngineStop(() => { if (view === mine && !state.touched && !state.selected) view.fit(900); });
+}
+
 function initGraph() {
   const degree = {};
   graph.edges.forEach((e) => {
@@ -368,40 +608,22 @@ function initGraph() {
     .slice(0, 14).forEach((n) => { n.hub = true; });
   allLinks = graph.edges.map((e) => ({ source: e.from, target: e.to, type: e.type }));
 
-  fg = new ForceGraph($("#graph"))
-    .backgroundColor("rgba(0,0,0,0)")
-    .nodeId("id").nodeVal((n) => n.r * n.r)
-    .nodeLabel((n) => `${esc(n.name)}<small>${esc(typeLabel(n))}</small>`)
-    .nodeCanvasObject(drawNode)
-    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 3, 0, 2 * Math.PI); ctx.fill(); })
-    .linkColor(linkColor)
-    .linkWidth((l) => (linkLit(l) ? 1.6 : l.type === "REALLY_WANTS" ? 1.1 : 0.6))
-    .linkLineDash((l) => (l.type === "REALLY_WANTS" ? [3, 2.5] : null))
-    .linkDirectionalArrowLength((l) => (linkLit(l) ? 4.5 : l.type === "USES" ? 0 : 2.2))
-    .linkDirectionalArrowRelPos(1)
-    .linkDirectionalParticles((l) => (linkLit(l) ? 2 : 0))
-    .linkDirectionalParticleWidth(2.6)
-    .linkDirectionalParticleSpeed(0.007)
-    .linkDirectionalParticleColor((l) => (l.type === "REALLY_WANTS" ? C.magenta : C.text))
-    .autoPauseRedraw(false)
-    .warmupTicks(140).cooldownTicks(260).d3VelocityDecay(0.32)
-    .onNodeHover((n) => { state.hovered = n ? n.id : null; refreshHighlight(); $("#graph").style.cursor = n ? "pointer" : ""; })
-    .onNodeClick((n) => select(n.id, { fly: true }))
-    .onBackgroundClick(() => select(null));
-  fg.d3Force("charge").strength(-260).distanceMax(600);
-  // Gentle pull to the centre so disconnected clusters stay in frame.
-  let simNodes = [];
-  const gravity = (a) => simNodes.forEach((n) => { n.vx -= n.x * 0.075 * a; n.vy -= n.y * 0.075 * a; });
-  gravity.initialize = (ns) => { simNodes = ns; };
-  fg.d3Force("gravity", gravity);
-  fg.d3Force("link").distance((l) => LINK_DISTANCE[l.type] || 60);
+  let saved = null;
+  try { saved = localStorage.getItem("dims"); } catch (e) { /* private mode */ }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) state.rotate = false;
+  $("#rotate").setAttribute("aria-pressed", String(state.rotate));
+  mount(saved === "2d" ? "2d" : "3d");
 
-  const resize = () => fg.width(window.innerWidth).height(window.innerHeight);
-  window.addEventListener("resize", resize); resize();
-  applyFilters();
-  const fit = (ms) => fg.zoomToFit(ms, window.innerWidth < 820 ? 30 : 70);
-  setTimeout(() => { fit(0); const start = location.hash.slice(1); if (byId[start]) select(start, { fly: true }); }, 60);
-  $("#fit").addEventListener("click", () => fit(600));
+  window.addEventListener("resize", () => view.resize());
+  $("#fit").addEventListener("click", () => view.fit(600));
+  $("#rotate").addEventListener("click", () => setRotate(!state.rotate));
+  // Taking hold of the graph stops the idle spin.
+  $("#graph").addEventListener("pointerdown", () => { state.touched = true; if (state.rotate) setRotate(false); });
+  $("#graph").addEventListener("wheel", () => { state.touched = true; }, { passive: true });
+  bindSeg("#dims", (v) => {
+    try { localStorage.setItem("dims", v); } catch (e) { /* private mode */ }
+    mount(v);
+  });
 }
 
 function init(data) {
@@ -422,7 +644,7 @@ function init(data) {
   if (typeof ForceGraph === "undefined") { $("#graph").textContent = "The graph library failed to load."; return; }
   initGraph();
 
-  bindSeg("#lens", (v) => { state.lens = v; renderLegend(); });
+  bindSeg("#lens", (v) => { state.lens = v; renderLegend(); view.restyle(); });
   bindSeg("#f-class", (v) => { state.cls = v; applyFilters(); });
   bindSeg("#f-inv", (v) => { state.inv = v; applyFilters(); });
   $("#f-modality").addEventListener("change", (e) => { state.modality = e.target.value; applyFilters(); });
@@ -436,7 +658,7 @@ function init(data) {
     const current = root.dataset.theme || "dark";
     root.dataset.theme = current === "dark" ? "light" : "dark";
     try { localStorage.setItem("theme", root.dataset.theme); } catch (e) { /* private mode */ }
-    readTheme(); renderLegend(); renderDetail();
+    readTheme(); renderLegend(); renderDetail(); view.restyle();
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && document.activeElement !== $("#search")) { $("#gaps").hidden ? select(null) : showView("network"); }

@@ -71,7 +71,17 @@
 <aside class="glass" id="detail" aria-live="polite" hidden></aside>
 
 <div class="hud">
-  <button class="icon glass" id="fit" title="Fit graph to screen" aria-label="Fit graph to screen">⤢</button>
+  <div class="seg glass" id="dims" role="radiogroup" aria-label="View in two or three dimensions">
+    <button role="radio" aria-checked="true" data-v="3d">3D</button>
+    <button role="radio" aria-checked="false" data-v="2d">2D</button>
+  </div>
+  <button class="icon glass" id="rotate" aria-pressed="true" title="Auto-rotate" aria-label="Auto-rotate">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.7-4"/><path d="M12.2 1.5v2.800H9.400"/></svg>
+  </button>
+  <button class="icon glass" id="fit" title="Fit graph to screen" aria-label="Fit graph to screen">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6V2h4M14 6V2h-4M2 10v4h4M14 10v4h-4"/></svg>
+  </button>
+  <span class="hint">Drag to rotate · scroll to zoom · right-drag to pan</span>
 </div>
 
 <main class="glass" id="gaps" hidden>
@@ -85,6 +95,7 @@
 </main>
 
 <script src="vendor/force-graph.min.js"></script>
+<script src="vendor/graph3d.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
