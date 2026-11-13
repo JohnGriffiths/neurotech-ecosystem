@@ -21,6 +21,11 @@ to build: interoperability, benchmarks, data harmonisation and open re-implement
 
 ## The viewer
 
+**Live at <https://johngriffiths.github.io/neurotech-ecosystem/>.** It is rebuilt from `main` on every push.
+All seed data is unverified (see below and [docs/HANDOFF.md](docs/HANDOFF.md)).
+
+To run it locally:
+
 ```
 pip install -r requirements.txt
 python tools/ntgraph.py build

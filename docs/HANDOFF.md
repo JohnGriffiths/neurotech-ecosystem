@@ -9,24 +9,22 @@ original session. See [AGENTS.md](../AGENTS.md) for how to work in the repositor
 - `main` holds everything (the working branch `ccr-4306a83e-mkeyk9` is identical).
 - The graph has **272 nodes and 466 edges, none verified**: 64 projects, 93 organisations, 37 people,
   28 devices, 19 technologies, 9 indications, 22 gaps. 18 gaps are open on the gaps board.
-- The validator and 9 tests pass. All 52 project repos were confirmed reachable on GitHub.
+- The site is live (see below). The validator and 9 tests pass. All 52 project repos were confirmed reachable on GitHub.
 - The viewer is complete enough to show: 3D rotatable network by default, 2D toggle, search, filters,
   three colour modes, detail panel, gaps board, light/dark, phone layout.
 
-## Blocked: the site is not live
+## The site is live
 
-The GitHub Actions workflow builds the site and uploads it, but the publish step fails with
-`Failed to create deployment (status: 404) ... Ensure GitHub Pages has been enabled`. It has failed twice
-(run 43358030253, attempts 1 and 2).
+<https://johngriffiths.github.io/neurotech-ecosystem/>, deployed by the `graph` workflow on every push to
+`main` (first successful deploy: run 43362499109, 2026-11-13). The repository is public and Pages is set to
+build from GitHub Actions. The earlier deploy failures happened because Pages was not yet enabled.
 
-To unblock, the repository owner must:
+The deployed site has not been checked in a real browser from the build environment, which cannot reach
+`github.io`. The same build was checked locally in headless Chromium: 3D view, no console errors. Someone
+should open the live URL on a desktop and a phone.
 
-1. Make the repository public (he said he would).
-2. Settings → Pages → Source: **GitHub Actions**.
-
-Then re-run the `graph` workflow (Actions tab, or its `workflow_dispatch` trigger). The site should appear
-at `https://johngriffiths.github.io/neurotech-ecosystem/`. After the first successful deploy, check that the
-3D view loads there and add the URL to the README.
+The repository also has a `gh-pages` branch and a legacy `pages-build-deployment` run from before Pages was
+switched to Actions. It is unused and can be deleted.
 
 ## What is real and what is not
 
