@@ -536,7 +536,7 @@ function make3d(container) {
         .linkDirectionalArrowLength(fg.linkDirectionalArrowLength()).linkDirectionalParticles(fg.linkDirectionalParticles());
     },
     focus: (n) => {
-      const d = Math.hypot(n.x, n.y, n.z) || 1, k = 1 + 300 / d;
+      const d = Math.hypot(n.x, n.y, n.z) || 1, k = 1 + (window.innerWidth < 820 ? 560 : 300) / d;
       fg.cameraPosition({ x: n.x * k, y: n.y * k, z: n.z * k }, n, 900);
     },
     fit: (ms) => {
