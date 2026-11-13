@@ -1,6 +1,7 @@
+# Who produces or stewards what. Source is an org or a person.
 defaults: {type: MAINTAINS}
 edges:
-  # hardware
+  # devices
   - {from: openbci, to: openbci-cyton}
   - {from: openbci, to: openbci-ganglion}
   - {from: interaxon, to: muse-headband}
@@ -13,9 +14,20 @@ edges:
   - {from: kernel, to: kernel-flow}
   - {from: imec, to: neuropixels}
   - {from: open-ephys, to: open-ephys-acq-board}
-  # software
+  - {from: neuroelectrics, to: starstim}
+  - {from: blackrock-neurotech, to: utah-array}
+  - {from: neuralink, to: neuralink-n1}
+  - {from: synchron, to: stentrode}
+  - {from: medtronic, to: medtronic-percept}
+  - {from: neuropace, to: neuropace-rns}
+  - {from: livanova, to: vns-therapy}
+  - {from: abbott, to: proclaim-scs}
+  - {from: cochlear, to: cochlear-nucleus}
+  - {from: neuronetics, to: neurostar-tms}
+  - {from: brainsway, to: brainsway-deep-tms}
+  - {from: flow-neuroscience, to: flow-fl100}
+  # projects, by organisation
   - {from: openbci, to: openbci-gui}
-  - {from: emotiv, to: emotiv-cortex}
   - {from: neurosity, to: neurosity-sdk}
   - {from: mentalab, to: explorepy}
   - {from: brainflow-dev, to: brainflow}
@@ -40,12 +52,30 @@ edges:
   - {from: open-ephys, to: open-ephys-gui}
   - {from: catalystneuro, to: neuroconv}
   - {from: nwb-community, to: pynwb}
-  # standards, archives, datasets
-  - {from: bids-community, to: bids}
   - {from: nwb-community, to: nwb}
+  - {from: nipreps, to: fmriprep}
+  - {from: bids-community, to: bids}
   - {from: sfnirs, to: snirf}
   - {from: poldrack-lab, to: openneuro}
   - {from: dandi-team, to: dandi-archive}
   - {from: mit-lcp, to: physionet}
   - {from: temple-nedc, to: tuh-eeg}
   - {from: child-mind-institute, to: hbn-eeg}
+  # projects, by person
+  - {from: alexandre-barachant, to: muselsl}
+  - {from: raphael-vallat, to: yasa}
+  - {from: christian-kothe, to: liblsl}
+  - {from: arnaud-delorme, to: eeglab}
+  - {from: robert-oostenveld, to: fieldtrip}
+  - {from: marius-pachitariu, to: kilosort}
+  - {from: uri-shaked, to: muse-js}
+  - {from: john-griffiths, to: eeg-expy}
+  - {from: sylvain-chevallier, to: moabb}
+  - {from: bruno-aristimunha, to: moabb}
+  - {from: mainak-jas, to: autoreject}
+  - {from: clemens-brunner, to: pyxdf}
+  - {from: oscar-esteban, to: fmriprep}
+  - {from: andreas-horn, to: lead-dbs}
+  - {from: axel-thielscher, to: simnibs}
+  - {from: viktor-jirsa, to: tvb}
+  - {from: randy-mcintosh, to: tvb}

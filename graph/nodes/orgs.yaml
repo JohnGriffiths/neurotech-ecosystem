@@ -1,0 +1,110 @@
+defaults: {type: org}
+nodes:
+  # --- companies: consumer and research ---
+  - {id: openbci, kind: company, name: OpenBCI, url: "https://openbci.com",
+     description: "Open-hardware biosensing boards and headsets."}
+  - {id: interaxon, kind: company, name: InteraXon (Muse), url: "https://choosemuse.com",
+     description: "Consumer EEG headbands for meditation and sleep."}
+  - {id: emotiv, kind: company, name: EMOTIV, url: "https://www.emotiv.com",
+     description: "Consumer and research wireless EEG headsets."}
+  - {id: neurosity, kind: company, name: Neurosity, url: "https://neurosity.co",
+     description: "Maker of the Crown EEG headset."}
+  - {id: gtec, kind: company, name: g.tec medical engineering, url: "https://www.gtec.at",
+     description: "Research and clinical BCI hardware."}
+  - {id: mentalab, kind: company, name: Mentalab, url: "https://mentalab.com",
+     description: "Mobile ExG amplifiers for research."}
+  - {id: pieeg, kind: company, name: PiEEG, url: "https://pieeg.com",
+     description: "Low-cost EEG shields for Raspberry Pi."}
+  - {id: upside-down-labs, kind: company, name: Upside Down Labs, url: "https://upsidedownlabs.tech",
+     description: "Low-cost open-hardware biopotential sensors."}
+  - {id: kernel, kind: company, name: Kernel, url: "https://www.kernel.com",
+     description: "Maker of the Flow time-domain fNIRS headset."}
+  - {id: neuroelectrics, kind: company, name: Neuroelectrics, url: "https://www.neuroelectrics.com",
+     description: "EEG and transcranial electrical stimulation systems."}
+  - {id: imec, kind: institute, name: imec, url: "https://www.imec-int.com",
+     description: "Research institute that fabricates Neuropixels probes."}
+  - {id: catalystneuro, kind: company, name: CatalystNeuro, url: "https://www.catalystneuro.com",
+     description: "Consultancy building neurophysiology data standardisation tools."}
+
+  # --- companies: implants and clinical neuromodulation ---
+  - {id: medtronic, kind: company, name: Medtronic, url: "https://www.medtronic.com",
+     description: "Medical device maker; DBS and other neuromodulation systems."}
+  - {id: abbott, kind: company, name: Abbott, url: "https://www.abbott.com",
+     description: "Medical device maker; DBS and spinal cord stimulation systems."}
+  - {id: neuropace, kind: company, name: NeuroPace, url: "https://www.neuropace.com",
+     description: "Maker of the RNS responsive neurostimulation system."}
+  - {id: livanova, kind: company, name: LivaNova, url: "https://www.livanova.com",
+     description: "Maker of VNS Therapy."}
+  - {id: cochlear, kind: company, name: Cochlear, url: "https://www.cochlear.com",
+     description: "Cochlear implant maker."}
+  - {id: neuronetics, kind: company, name: Neuronetics, url: "https://neurostar.com",
+     description: "Maker of NeuroStar TMS."}
+  - {id: brainsway, kind: company, name: BrainsWay, url: "https://www.brainsway.com",
+     description: "Maker of Deep TMS systems."}
+  - {id: flow-neuroscience, kind: company, name: Flow Neuroscience, url: "https://www.flowneuroscience.com",
+     description: "Home-use tDCS for depression."}
+  - {id: blackrock-neurotech, kind: company, name: Blackrock Neurotech, url: "https://blackrockneurotech.com",
+     description: "Intracortical arrays and recording systems."}
+  - {id: neuralink, kind: company, name: Neuralink, url: "https://neuralink.com",
+     description: "Implantable brain-computer interfaces."}
+  - {id: synchron, kind: company, name: Synchron, url: "https://synchron.com",
+     description: "Endovascular brain-computer interfaces."}
+
+  # --- universities and institutes ---
+  - {id: ucsd, kind: university, name: UC San Diego, url: "https://ucsd.edu", description: "University of California San Diego."}
+  - {id: radboud-university, kind: university, name: Radboud University, url: "https://www.ru.nl", description: "Nijmegen, the Netherlands."}
+  - {id: stanford, kind: university, name: Stanford University, url: "https://www.stanford.edu", description: "Stanford, California."}
+  - {id: temple-university, kind: university, name: Temple University, url: "https://www.temple.edu", description: "Philadelphia, Pennsylvania."}
+  - {id: mit, kind: university, name: MIT, url: "https://www.mit.edu", description: "Massachusetts Institute of Technology."}
+  - {id: university-of-toronto, kind: university, name: University of Toronto, url: "https://www.utoronto.ca", description: "Toronto, Canada."}
+  - {id: camh, kind: institute, name: CAMH, url: "https://www.camh.ca", description: "Centre for Addiction and Mental Health, Toronto."}
+  - {id: hhmi-janelia, kind: institute, name: HHMI Janelia Research Campus, url: "https://www.janelia.org", description: "Neuroscience research campus."}
+  - {id: inria, kind: institute, name: Inria, url: "https://www.inria.fr", description: "French national research institute for digital science."}
+  - {id: child-mind-institute, kind: institute, name: Child Mind Institute, url: "https://childmind.org",
+     description: "Runs the Healthy Brain Network data collection."}
+
+  # --- labs ---
+  - {id: sccn, kind: lab, name: Swartz Center for Computational Neuroscience, url: "https://sccn.ucsd.edu",
+     description: "Home of EEGLAB, Lab Streaming Layer and NEMAR."}
+  - {id: donders, kind: lab, name: Donders Institute, url: "https://www.ru.nl/donders",
+     description: "Home of the FieldTrip toolbox."}
+  - {id: ncan, kind: lab, name: National Center for Adaptive Neurotechnologies, url: "https://www.neurotechcenter.org",
+     description: "Stewards of BCI2000."}
+  - {id: temple-nedc, kind: lab, name: Neural Engineering Data Consortium, url: "https://isip.piconepress.com/projects/nedc/",
+     description: "Publishes the TUH EEG Corpus."}
+  - {id: mit-lcp, kind: lab, name: MIT Laboratory for Computational Physiology, url: "https://physionet.org",
+     description: "Operates PhysioNet."}
+  - {id: poldrack-lab, kind: lab, name: Poldrack Lab, url: "https://poldracklab.org",
+     description: "Operates OpenNeuro."}
+
+  # --- open-source teams ---
+  - {id: mne-tools, kind: oss_team, name: MNE developers, url: "https://github.com/mne-tools",
+     description: "Maintainers of MNE-Python and its satellite packages."}
+  - {id: brainflow-dev, kind: oss_team, name: BrainFlow developers, url: "https://github.com/brainflow-dev",
+     description: "Maintainers of BrainFlow."}
+  - {id: braindecode-dev, kind: oss_team, name: Braindecode developers, url: "https://github.com/braindecode",
+     description: "Maintainers of Braindecode."}
+  - {id: pyriemann-dev, kind: oss_team, name: pyRiemann developers, url: "https://github.com/pyRiemann",
+     description: "Maintainers of pyRiemann."}
+  - {id: spikeinterface-dev, kind: oss_team, name: SpikeInterface developers, url: "https://github.com/SpikeInterface",
+     description: "Maintainers of SpikeInterface."}
+  - {id: open-ephys, kind: oss_team, name: Open Ephys, url: "https://open-ephys.org",
+     description: "Non-profit producing open-source electrophysiology hardware and software."}
+  - {id: timeflux-dev, kind: oss_team, name: Timeflux developers, url: "https://github.com/timeflux",
+     description: "Maintainers of Timeflux."}
+  - {id: open-science-tools, kind: oss_team, name: Open Science Tools, url: "https://opensciencetools.org",
+     description: "Maintainers of PsychoPy."}
+  - {id: nipreps, kind: oss_team, name: NiPreps, url: "https://www.nipreps.org",
+     description: "Community maintaining fMRIPrep and related preprocessing pipelines."}
+  - {id: dandi-team, kind: oss_team, name: DANDI team, url: "https://dandiarchive.org",
+     description: "Operates the DANDI neurophysiology archive."}
+
+  # --- communities and standards bodies ---
+  - {id: neurotechx, kind: community, name: NeuroTechX, url: "https://neurotechx.com",
+     description: "International neurotechnology enthusiast community."}
+  - {id: bids-community, kind: standards_body, name: BIDS community, url: "https://bids.neuroimaging.io",
+     description: "Maintains the Brain Imaging Data Structure specification."}
+  - {id: nwb-community, kind: standards_body, name: Neurodata Without Borders, url: "https://www.nwb.org",
+     description: "Maintains the NWB standard and core software."}
+  - {id: sfnirs, kind: standards_body, name: Society for fNIRS, url: "https://fnirs.org",
+     description: "Stewards the SNIRF file format."}

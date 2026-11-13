@@ -1,0 +1,25 @@
+# What clinical neurotechnology is used for. `stage` is approved (regulatory approval or
+# clearance in at least one major market) or investigational (in clinical trials).
+defaults: {type: INDICATED_FOR}
+edges:
+  - {from: medtronic-percept, to: parkinsons-disease, stage: approved}
+  - {from: medtronic-percept, to: essential-tremor, stage: approved}
+  - {from: medtronic-percept, to: dystonia, stage: approved}
+  - {from: medtronic-percept, to: epilepsy, stage: approved}
+  - {from: medtronic-percept, to: ocd, stage: approved}
+  - {from: neuropace-rns, to: epilepsy, stage: approved}
+  - {from: vns-therapy, to: epilepsy, stage: approved}
+  - {from: vns-therapy, to: major-depression, stage: approved}
+  - {from: proclaim-scs, to: chronic-pain, stage: approved}
+  - {from: cochlear-nucleus, to: hearing-loss, stage: approved}
+  - {from: neurostar-tms, to: major-depression, stage: approved}
+  - {from: neurostar-tms, to: ocd, stage: approved}
+  - {from: brainsway-deep-tms, to: major-depression, stage: approved}
+  - {from: brainsway-deep-tms, to: ocd, stage: approved}
+  - {from: flow-fl100, to: major-depression, stage: approved}
+  - {from: utah-array, to: paralysis, stage: investigational}
+  - {from: neuralink-n1, to: paralysis, stage: investigational}
+  - {from: stentrode, to: paralysis, stage: investigational}
+  # modality-level, diagnostic
+  - {from: eeg, to: epilepsy, stage: approved, note: "Diagnosis and monitoring."}
+  - {from: seeg, to: epilepsy, stage: approved, note: "Presurgical localisation of the seizure onset zone."}

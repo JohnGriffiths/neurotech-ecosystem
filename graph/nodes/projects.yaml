@@ -1,0 +1,139 @@
+# The main entities. A project is almost always a GitHub repository: give `repo: owner/name`.
+# `modalities` lists the technologies it works with; each entry becomes a USES edge.
+defaults: {type: project, kind: software}
+nodes:
+  # --- acquisition ---
+  - {id: brainflow, repo: brainflow-dev/brainflow, layer: acquisition, modalities: [eeg, emg], name: BrainFlow,
+     description: "Uniform acquisition API across many biosensor boards."}
+  - {id: openbci-gui, repo: OpenBCI/OpenBCI_GUI, layer: acquisition, modalities: [eeg, emg], name: OpenBCI GUI,
+     description: "Desktop application for streaming and visualising OpenBCI data."}
+  - {id: explorepy, repo: Mentalab-hub/explorepy, layer: acquisition, modalities: [eeg], name: explorepy,
+     description: "Python API for Mentalab Explore devices."}
+  - {id: neurosity-sdk, repo: neurosity/neurosity-sdk-js, layer: acquisition, modalities: [eeg], name: Neurosity SDK,
+     description: "JavaScript SDK for the Neurosity Crown."}
+  - {id: muse-js, repo: urish/muse-js, layer: acquisition, modalities: [eeg], name: muse-js,
+     description: "Web Bluetooth client for Muse headbands."}
+  - {id: open-ephys-gui, repo: open-ephys/plugin-GUI, layer: acquisition, modalities: [intracortical], name: Open Ephys GUI,
+     description: "Plugin-based acquisition software for extracellular electrophysiology."}
+
+  # --- streaming and real time ---
+  - {id: liblsl, repo: sccn/liblsl, layer: streaming, modalities: [eeg], name: Lab Streaming Layer,
+     description: "Time-synchronised streaming of measurement time series over a network."}
+  - {id: pylsl, repo: labstreaminglayer/pylsl, layer: streaming, name: pylsl,
+     description: "Python bindings for liblsl."}
+  - {id: muselsl, repo: alexandrebarachant/muse-lsl, layer: streaming, modalities: [eeg], name: muselsl,
+     description: "Streams Muse headband data to LSL."}
+  - {id: bluemuse, repo: kowalej/BlueMuse, layer: streaming, modalities: [eeg], name: BlueMuse,
+     description: "Windows application streaming Muse data to LSL."}
+  - {id: mne-lsl, repo: mne-tools/mne-lsl, layer: streaming, modalities: [eeg], name: MNE-LSL,
+     description: "Real-time framework integrating MNE-Python with LSL."}
+  - {id: timeflux, repo: timeflux/timeflux, layer: streaming, modalities: [eeg], name: Timeflux,
+     description: "Python framework for real-time biosignal pipelines and BCIs."}
+  - {id: openvibe, layer: streaming, modalities: [eeg], name: OpenViBE, url: "http://openvibe.inria.fr",
+     description: "Graphical platform for designing and running BCIs."}
+  - {id: bci2000, layer: streaming, modalities: [eeg, ecog], name: BCI2000, url: "https://www.bci2000.org",
+     description: "General-purpose BCI research software suite."}
+  - {id: opennft, repo: OpenNFT/OpenNFT, layer: streaming, modalities: [fmri], name: OpenNFT,
+     description: "Real-time fMRI neurofeedback framework."}
+
+  # --- processing: electrophysiology ---
+  - {id: mne-python, repo: mne-tools/mne-python, layer: processing, modalities: [eeg, meg, seeg, ecog, fnirs], name: MNE-Python,
+     description: "Analysis and visualisation of MEG, EEG, sEEG, ECoG and fNIRS data."}
+  - {id: mne-bids, repo: mne-tools/mne-bids, layer: processing, modalities: [eeg, meg, seeg, ecog], name: MNE-BIDS,
+     description: "Read and write BIDS datasets with MNE-Python."}
+  - {id: mne-nirs, repo: mne-tools/mne-nirs, layer: processing, modalities: [fnirs], name: MNE-NIRS,
+     description: "fNIRS analysis built on MNE-Python."}
+  - {id: autoreject, repo: autoreject/autoreject, layer: processing, modalities: [eeg, meg], name: autoreject,
+     description: "Automated rejection and repair of bad EEG/MEG epochs."}
+  - {id: pyxdf, repo: xdf-modules/pyxdf, layer: processing, name: pyxdf,
+     description: "Python reader for XDF files."}
+  - {id: eeglab, repo: sccn/eeglab, layer: processing, modalities: [eeg], name: EEGLAB,
+     description: "MATLAB toolbox for EEG analysis."}
+  - {id: fieldtrip, repo: fieldtrip/fieldtrip, layer: processing, modalities: [meg, eeg, seeg, ecog], name: FieldTrip,
+     description: "MATLAB toolbox for MEG, EEG and iEEG analysis."}
+  - {id: brainstorm, repo: brainstorm-tools/brainstorm3, layer: processing, modalities: [meg, eeg, seeg, ecog, fnirs], name: Brainstorm,
+     description: "MATLAB application for MEG, EEG, iEEG and fNIRS analysis."}
+  - {id: yasa, repo: raphaelvallat/yasa, layer: processing, modalities: [eeg], name: YASA,
+     description: "Sleep analysis toolbox with automatic sleep staging."}
+  - {id: homer3, repo: BUNPC/Homer3, layer: processing, modalities: [fnirs], name: Homer3,
+     description: "MATLAB application for fNIRS analysis."}
+  - {id: spikeinterface, repo: SpikeInterface/spikeinterface, layer: processing, modalities: [intracortical], name: SpikeInterface,
+     description: "Unified framework for spike sorting."}
+  - {id: kilosort, repo: MouseLand/Kilosort, layer: processing, modalities: [intracortical], name: Kilosort,
+     description: "Spike sorting for high-density probes."}
+  - {id: neuroconv, repo: catalystneuro/neuroconv, layer: processing, modalities: [intracortical], name: NeuroConv,
+     description: "Converts neurophysiology data from many formats to NWB."}
+  - {id: pynwb, repo: NeurodataWithoutBorders/pynwb, layer: processing, modalities: [intracortical], name: PyNWB,
+     description: "Python API for reading and writing NWB files."}
+
+  # --- processing: MRI ---
+  - {id: fmriprep, repo: nipreps/fmriprep, layer: processing, modalities: [fmri], name: fMRIPrep,
+     description: "Robust preprocessing pipeline for fMRI data."}
+  - {id: nilearn, repo: nilearn/nilearn, layer: processing, modalities: [fmri], name: Nilearn,
+     description: "Statistics and machine learning for neuroimaging in Python."}
+  - {id: freesurfer, repo: freesurfer/freesurfer, layer: processing, modalities: [fmri], name: FreeSurfer,
+     description: "Cortical surface reconstruction and structural MRI analysis."}
+  - {id: dcm2niix, repo: rordenlab/dcm2niix, layer: processing, modalities: [fmri], name: dcm2niix,
+     description: "Converts DICOM images to NIfTI with BIDS sidecars."}
+
+  # --- neuromodulation ---
+  - {id: simnibs, repo: simnibs/simnibs, layer: modelling, modalities: [tms, tes], name: SimNIBS,
+     description: "Electric field simulation for TMS and transcranial electrical stimulation."}
+  - {id: lead-dbs, repo: netstim/leaddbs, layer: processing, modalities: [dbs], name: Lead-DBS,
+     description: "MATLAB toolbox for DBS electrode localisation and connectomic analysis."}
+  - {id: perceive, repo: neuromodulation/perceive, layer: processing, modalities: [dbs], name: Perceive Toolbox,
+     description: "MATLAB toolbox for reading local field potential recordings exported from sensing-enabled DBS devices."}
+
+  # --- modelling ---
+  - {id: tvb, repo: the-virtual-brain/tvb-root, layer: modelling, modalities: [eeg, meg, fmri], name: The Virtual Brain,
+     description: "Whole-brain network simulation platform."}
+
+  # --- machine learning and benchmarking ---
+  - {id: moabb, repo: NeuroTechX/moabb, layer: ml, modalities: [eeg], name: MOABB,
+     description: "Mother of All BCI Benchmarks: reproducible benchmarking of BCI algorithms on open datasets."}
+  - {id: braindecode, repo: braindecode/braindecode, layer: ml, modalities: [eeg, meg, ecog], name: Braindecode,
+     description: "Deep learning toolbox for decoding raw electrophysiology data."}
+  - {id: pyriemann, repo: pyRiemann/pyRiemann, layer: ml, modalities: [eeg], name: pyRiemann,
+     description: "Riemannian-geometry machine learning for multivariate biosignals."}
+
+  # --- experiment ---
+  - {id: eeg-expy, repo: NeuroTechX/EEG-ExPy, layer: experiment, modalities: [eeg], name: EEG-ExPy,
+     description: "Classic EEG experiments on consumer hardware (formerly eeg-notebooks)."}
+  - {id: psychopy, repo: psychopy/psychopy, layer: experiment, name: PsychoPy,
+     description: "Stimulus presentation and experiment control."}
+
+  # --- standards and formats ---
+  - {id: bids, kind: standard, repo: bids-standard/bids-specification, layer: standard, modalities: [fmri, eeg, meg, seeg, ecog, fnirs], name: BIDS,
+     description: "Brain Imaging Data Structure: standard for organising neuroimaging and electrophysiology datasets."}
+  - {id: nwb, kind: standard, repo: NeurodataWithoutBorders/nwb-schema, layer: standard, modalities: [intracortical], name: NWB,
+     description: "Neurodata Without Borders: data standard for neurophysiology."}
+  - {id: snirf, kind: standard, repo: fNIRS/snirf, layer: standard, modalities: [fnirs], name: SNIRF,
+     description: "Shared Near Infrared Spectroscopy Format."}
+  - {id: xdf, kind: standard, repo: sccn/xdf, layer: standard, name: XDF,
+     description: "Container format for multi-stream recordings, used by LSL LabRecorder."}
+  - {id: edf, kind: standard, layer: standard, modalities: [eeg], name: EDF / EDF+, url: "https://www.edfplus.info",
+     description: "European Data Format for biosignal recordings."}
+
+  # --- archives and datasets ---
+  - {id: openneuro, kind: dataset, repo: OpenNeuroOrg/openneuro, layer: data, modalities: [fmri, eeg, meg], name: OpenNeuro,
+     description: "Open archive of BIDS-formatted neuroimaging datasets."}
+  - {id: dandi-archive, kind: dataset, repo: dandi/dandi-archive, layer: data, modalities: [intracortical], name: DANDI Archive,
+     description: "Archive for cellular neurophysiology data in NWB."}
+  - {id: nemar, kind: dataset, layer: data, modalities: [eeg, meg, seeg], name: NEMAR, url: "https://nemar.org",
+     description: "Gateway to OpenNeuro EEG, MEG and iEEG data with compute access."}
+  - {id: physionet, kind: dataset, layer: data, modalities: [eeg], name: PhysioNet, url: "https://physionet.org",
+     description: "Repository of physiological signal datasets."}
+  - {id: tuh-eeg, kind: dataset, layer: data, modalities: [eeg], name: TUH EEG Corpus, url: "https://isip.piconepress.com/projects/nedc/html/tuh_eeg/",
+     description: "Large corpus of clinical EEG recordings."}
+  - {id: eegmmidb, kind: dataset, layer: data, modalities: [eeg], name: EEG Motor Movement/Imagery Dataset, url: "https://physionet.org/content/eegmmidb/",
+     description: "109-subject motor execution and imagery EEG dataset."}
+  - {id: sleep-edf, kind: dataset, layer: data, modalities: [eeg], name: Sleep-EDF Expanded, url: "https://physionet.org/content/sleep-edfx/",
+     description: "Whole-night polysomnography recordings with hypnograms."}
+  - {id: bci-competition-iv, kind: dataset, layer: data, modalities: [eeg], name: BCI Competition IV datasets, url: "https://www.bbci.de/competition/iv/",
+     description: "Widely used motor imagery benchmark datasets."}
+  - {id: hbn-eeg, kind: dataset, layer: data, modalities: [eeg], name: Healthy Brain Network EEG, url: "https://childmind.org",
+     description: "Large developmental high-density EEG dataset."}
+
+  # --- proposed (does not exist yet) ---
+  - {id: device-descriptor-registry, kind: standard, layer: standard, status: proposed, modalities: [eeg], name: Open device descriptor registry,
+     description: "Machine-readable registry of biosensing devices: channels, electrode positions, sampling rates, reference scheme and transport."}

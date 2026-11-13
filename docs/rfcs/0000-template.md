@@ -27,7 +27,7 @@ What this deliberately does not do.
 - [ ] Test coverage of N% with CI
 - [ ] One worked example notebook on real data
 - [ ] Sponsor has run it on their own data
-- [ ] Graph updated: new tech node and `ADDRESSES` edge
+- [ ] Graph updated: new project node and `ADDRESSES` edge
 
 ## Work breakdown
 

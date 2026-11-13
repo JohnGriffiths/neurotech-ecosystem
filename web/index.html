@@ -3,255 +3,90 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neurotech Ecosystem Graph</title>
-<style>
-  :root {
-    --bg: #f7f7f5; --panel: #ffffff; --text: #1c1e21; --muted: #62676e; --line: #dcdcd7;
-    --actor: #b4552d; --tech: #2b6cb0; --problem: #7b3fa0; --proposed: #2f8f6b; --accent: #1c1e21;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #15171a; --panel: #1e2125; --text: #e8e8e6; --muted: #9aa0a8; --line: #33373d;
-      --actor: #e08a63; --tech: #6ea8e6; --problem: #c08ae0; --proposed: #6cc9a4; --accent: #e8e8e6;
-    }
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body { background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif;
-         display: flex; flex-direction: column; }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding: 10px 16px;
-           border-bottom: 1px solid var(--line); background: var(--panel); }
-  h1 { font-size: 17px; margin: 0; }
-  nav { display: flex; gap: 4px; }
-  nav button, .chip { font: inherit; color: var(--muted); background: none; border: 1px solid transparent;
-                      border-radius: 6px; padding: 4px 10px; cursor: pointer; }
-  nav button[aria-selected="true"] { color: var(--text); border-color: var(--line); background: var(--bg); }
-  #stats { color: var(--muted); font-size: 13px; margin-left: auto; }
-  main { flex: 1; min-height: 0; display: none; }
-  main.active { display: flex; }
-
-  /* graph view */
-  #graph-view { flex-direction: row; }
-  #cy-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  #controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 16px; }
-  #search { font: inherit; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px;
-            background: var(--panel); color: var(--text); width: 180px; }
-  .chip { border-color: var(--line); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
-  .chip[aria-pressed="false"] { opacity: .45; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  #cy { flex: 1; min-height: 300px; }
-  #detail { width: 340px; max-width: 100%; border-left: 1px solid var(--line); background: var(--panel);
-            padding: 16px; overflow-y: auto; }
-  #detail h2 { font-size: 16px; margin: 0 0 2px; }
-  #detail .meta { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
-  #detail h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 4px; }
-  #detail ul { margin: 0; padding-left: 18px; }
-  #detail li { margin: 2px 0; }
-  a { color: var(--tech); }
-  button.link { font: inherit; color: var(--tech); background: none; border: 0; padding: 0; cursor: pointer;
-                text-align: left; text-decoration: underline; }
-  .tag { font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--muted); white-space: nowrap; }
-
-  /* bounty view */
-  #bounty-view { overflow-y: auto; flex-direction: column; padding: 16px; }
-  #bounty-view > * { max-width: 900px; width: 100%; margin-left: auto; margin-right: auto; }
-  #bounty-view p.lead { color: var(--muted); margin-top: 0; }
-  .bounty { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
-            margin-bottom: 10px; display: grid; grid-template-columns: 52px 1fr; gap: 4px 14px; }
-  .score { grid-row: span 3; font-size: 26px; font-weight: 650; text-align: center; line-height: 1.1; }
-  .score small { display: block; font-size: 11px; font-weight: 400; color: var(--muted); }
-  .bounty h2 { font-size: 16px; margin: 0; }
-  .bounty p { margin: 0; color: var(--muted); }
-  .bounty dl { margin: 6px 0 0; display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 14px; }
-  .bounty dt { color: var(--muted); }
-  .bounty dd { margin: 0; }
-
-  @media (max-width: 760px) {
-    #graph-view { flex-direction: column; }
-    #detail { width: 100%; border-left: 0; border-top: 1px solid var(--line); max-height: 45%; }
-  }
-</style>
+<title>Neurotech Ecosystem</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>Neurotech Ecosystem Graph</h1>
-  <nav role="tablist">
-    <button role="tab" aria-selected="true" data-view="bounty-view">Bounty board</button>
-    <button role="tab" aria-selected="false" data-view="graph-view">Graph</button>
+<div id="graph" aria-label="Network of neurotechnology projects, organisations, people and technologies"></div>
+
+<header class="glass" id="topbar">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6">
+      <path d="M6 7l6 4 6-5M12 11l-1 7M11 18l-6-3M11 18l8-1"/></g>
+      <g fill="currentColor"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="11" r="2.8"/>
+      <circle cx="11" cy="18" r="2.2"/><circle cx="5" cy="15" r="1.6"/><circle cx="19" cy="17" r="1.6"/></g></svg>
+    <h1>Neurotech Ecosystem</h1>
+  </div>
+  <div class="search">
+    <input id="search" type="search" placeholder="Search projects, people, technologies…" autocomplete="off"
+           role="combobox" aria-expanded="false" aria-controls="results" aria-label="Search the graph">
+    <ul id="results" role="listbox" hidden></ul>
+  </div>
+  <nav role="tablist" aria-label="View">
+    <button role="tab" aria-selected="true" data-view="network">Network</button>
+    <button role="tab" aria-selected="false" data-view="gaps">Open gaps <span class="count" id="gap-count"></span></button>
   </nav>
-  <span id="stats"></span>
+  <button class="icon" id="theme" title="Switch theme" aria-label="Switch between light and dark theme"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 010 12.4z" fill="currentColor"/></svg></button>
 </header>
 
-<main id="bounty-view" class="active">
-  <p class="lead">Open gaps ranked by score: the number of actors and projects that want it, plus endorsements,
-    plus the number of things it unlocks. A gap leaves the board when an existing project fully addresses it.
-    Wants marked <span class="tag">unverified</span> are hypotheses awaiting confirmation from the actor concerned.</p>
-  <div id="bounties"></div>
-</main>
-
-<main id="graph-view">
-  <div id="cy-wrap">
-    <div id="controls">
-      <input id="search" type="search" placeholder="Search nodes…" aria-label="Search nodes">
-      <button class="chip" aria-pressed="true" data-type="actor"><span class="dot" style="background:var(--actor)"></span>Actors</button>
-      <button class="chip" aria-pressed="true" data-type="tech"><span class="dot" style="background:var(--tech)"></span>Tech</button>
-      <button class="chip" aria-pressed="true" data-type="problem"><span class="dot" style="background:var(--problem)"></span>Problems</button>
-      <button class="chip" aria-pressed="false" id="gaps-only">Gap edges only</button>
-    </div>
-    <div id="cy"></div>
+<aside class="glass" id="filters" aria-label="Filters">
+  <button class="sheet-toggle" id="filters-toggle" aria-expanded="false">Filters and legend</button>
+  <div class="sheet-body">
+    <section>
+      <h2>Colour by</h2>
+      <div class="seg" id="lens" role="radiogroup" aria-label="Colour by">
+        <button role="radio" aria-checked="true" data-v="type">Entity</button>
+        <button role="radio" aria-checked="false" data-v="class">Class</button>
+        <button role="radio" aria-checked="false" data-v="invasiveness">Invasiveness</button>
+      </div>
+      <ul class="legend" id="legend"></ul>
+    </section>
+    <section>
+      <h2>Entities</h2>
+      <ul class="legend" id="types"></ul>
+    </section>
+    <section>
+      <h2>Technology class</h2>
+      <div class="seg" id="f-class" role="radiogroup" aria-label="Technology class">
+        <button role="radio" aria-checked="true" data-v="">All</button>
+        <button role="radio" aria-checked="false" data-v="sensing">Sensing</button>
+        <button role="radio" aria-checked="false" data-v="modulating">Modulating</button>
+      </div>
+    </section>
+    <section>
+      <h2>Invasiveness</h2>
+      <div class="seg" id="f-inv" role="radiogroup" aria-label="Invasiveness">
+        <button role="radio" aria-checked="true" data-v="">All</button>
+        <button role="radio" aria-checked="false" data-v="noninvasive">Noninvasive</button>
+        <button role="radio" aria-checked="false" data-v="invasive">Invasive</button>
+      </div>
+    </section>
+    <section>
+      <h2><label for="f-modality">Technology</label></h2>
+      <select id="f-modality"><option value="">All technologies</option></select>
+      <label class="check"><input type="checkbox" id="f-clinical"> Clinical only</label>
+    </section>
+    <p class="stats" id="stats"></p>
   </div>
-  <aside id="detail"><p class="meta">Select a node to see its connections.</p></aside>
+</aside>
+
+<aside class="glass" id="detail" aria-live="polite" hidden></aside>
+
+<div class="hud">
+  <button class="icon glass" id="fit" title="Fit graph to screen" aria-label="Fit graph to screen">⤢</button>
+</div>
+
+<main class="glass" id="gaps" hidden>
+  <div class="gaps-inner">
+    <h2>Open gaps</h2>
+    <p class="lead">Things the ecosystem is missing, ranked by score: how many projects and organisations want it,
+      plus endorsements, plus how many other things it unlocks. A gap closes when an existing project fully
+      addresses it. Wants tagged <span class="tag">unverified</span> have not yet been confirmed with the party named.</p>
+    <div id="bounties"></div>
+  </div>
 </main>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
-<script>
-const $ = (sel) => document.querySelector(sel);
-const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const el = (tag, props = {}, ...children) => {
-  const node = Object.assign(document.createElement(tag), props);
-  node.append(...children.filter((c) => c != null));
-  return node;
-};
-const GAP_EDGES = new Set(["REALLY_WANTS", "ADDRESSES", "BLOCKS"]);
-let graph, byId, cy;
-
-function nodeLink(id) {
-  return el("button", { className: "link", textContent: byId[id].name, onclick: () => showNode(id, true) });
-}
-function linkList(ids) {
-  const frag = document.createDocumentFragment();
-  ids.forEach((id, i) => frag.append(i ? ", " : "", nodeLink(id)));
-  return ids.length ? frag : "–";
-}
-
-function renderBounties() {
-  const box = $("#bounties");
-  graph.bounties.forEach((b) => {
-    const unverified = b.wanted_by.length - b.verified_wants;
-    const dl = el("dl");
-    const row = (label, value) => dl.append(el("dt", { textContent: label }), el("dd", {}, value));
-    const wanted = el("span", {}, linkList(b.wanted_by));
-    if (unverified) wanted.append(" ", el("span", { className: "tag", textContent: `${unverified} unverified` }));
-    row("Wanted by", wanted);
-    if (b.endorsed_by.length) row("Endorsed by", b.endorsed_by.join(", "));
-    row("Unlocks", el("span", {}, linkList(b.unlocks)));
-    row("Partial solutions", el("span", {}, linkList(b.partial_solutions.map((s) => s.id))));
-    box.append(el("article", { className: "bounty" },
-      el("div", { className: "score" }, String(b.score), el("small", { textContent: "score" })),
-      el("h2", {}, nodeLink(b.id), " ", el("span", { className: "tag", textContent: b.kind })),
-      el("p", { textContent: b.description }),
-      dl));
-  });
-}
-
-function showNode(id, focus) {
-  const n = byId[id];
-  const panel = $("#detail");
-  panel.replaceChildren(
-    el("h2", { textContent: n.name }),
-    el("div", { className: "meta", textContent: [n.type, n.kind, n.layer, n.status === "proposed" ? "proposed" : null].filter(Boolean).join(" · ") }),
-    el("p", { textContent: n.description }),
-    n.url ? el("p", {}, el("a", { href: n.url, target: "_blank", rel: "noopener", textContent: n.url })) : "");
-  const groups = {};
-  graph.edges.forEach((e) => {
-    if (e.from === id) (groups[`${e.type} →`] ||= []).push([e.to, e]);
-    if (e.to === id) (groups[`← ${e.type}`] ||= []).push([e.from, e]);
-  });
-  Object.keys(groups).sort().forEach((label) => {
-    const ul = el("ul");
-    groups[label].forEach(([other, e]) => {
-      const extra = [e.coverage, e.status === "unverified" && GAP_EDGES.has(e.type) ? "unverified" : null].filter(Boolean);
-      ul.append(el("li", {}, nodeLink(other),
-        ...extra.flatMap((t) => [" ", el("span", { className: "tag", textContent: t })]),
-        e.note ? el("div", { className: "meta", textContent: e.note }) : null));
-    });
-    panel.append(el("h3", { textContent: label.replace(/_/g, " ") }), ul);
-  });
-  if (focus) {
-    selectView("graph-view");
-    if (cy) {
-      const target = cy.getElementById(id);
-      cy.elements().unselect();
-      target.select();
-      cy.animate({ center: { eles: target }, zoom: Math.max(cy.zoom(), 1) }, { duration: 250 });
-    }
-  }
-}
-
-function applyFilters() {
-  if (!cy) return;
-  const types = new Set([...document.querySelectorAll(".chip[data-type][aria-pressed='true']")].map((c) => c.dataset.type));
-  const gapsOnly = $("#gaps-only").getAttribute("aria-pressed") === "true";
-  const q = $("#search").value.trim().toLowerCase();
-  cy.batch(() => {
-    cy.edges().forEach((e) => e.style("display", !gapsOnly || GAP_EDGES.has(e.data("type")) ? "element" : "none"));
-    cy.nodes().forEach((n) => {
-      const visible = types.has(n.data("type")) && (!gapsOnly || n.connectedEdges().some((e) => GAP_EDGES.has(e.data("type"))));
-      n.style("display", visible ? "element" : "none");
-      n.style("opacity", !q || n.data("label").toLowerCase().includes(q) ? 1 : 0.15);
-    });
-  });
-}
-
-function initGraph() {
-  if (cy || typeof cytoscape === "undefined") {
-    if (!cy) $("#cy").textContent = "The graph library failed to load; the bounty board and graph.json are still available.";
-    return;
-  }
-  const degree = {};
-  graph.edges.forEach((e) => { degree[e.from] = (degree[e.from] || 0) + 1; degree[e.to] = (degree[e.to] || 0) + 1; });
-  const edgeColor = { REALLY_WANTS: css("--problem"), BLOCKS: css("--actor"), ADDRESSES: css("--proposed") };
-  cy = cytoscape({
-    container: $("#cy"),
-    elements: [
-      ...graph.nodes.map((n) => ({ data: { id: n.id, label: n.name, type: n.type, proposed: n.status === "proposed",
-                                           size: 14 + 3 * Math.sqrt(degree[n.id] || 0) * 2 } })),
-      ...graph.edges.map((e, i) => ({ data: { id: `e${i}`, source: e.from, target: e.to, type: e.type } })),
-    ],
-    style: [
-      { selector: "node", style: {
-          label: "data(label)", width: "data(size)", height: "data(size)", "font-size": 9, color: css("--text"),
-          "text-valign": "bottom", "text-margin-y": 3, "text-wrap": "ellipsis", "text-max-width": 110,
-          "min-zoomed-font-size": 7 } },
-      { selector: "node[type='actor']", style: { "background-color": css("--actor"), shape: "round-rectangle" } },
-      { selector: "node[type='tech']", style: { "background-color": css("--tech") } },
-      { selector: "node[type='problem']", style: { "background-color": css("--problem"), shape: "diamond" } },
-      { selector: "node[?proposed]", style: { "background-color": css("--bg"), "border-width": 2,
-          "border-style": "dashed", "border-color": css("--proposed") } },
-      { selector: "node:selected", style: { "border-width": 3, "border-color": css("--accent"), "border-style": "solid" } },
-      { selector: "edge", style: { width: 1, "line-color": css("--line"), "target-arrow-color": css("--line"),
-          "target-arrow-shape": "triangle", "arrow-scale": 0.7, "curve-style": "bezier" } },
-      ...Object.entries(edgeColor).map(([type, color]) => ({ selector: `edge[type='${type}']`,
-          style: { "line-color": color, "target-arrow-color": color, width: 1.6 } })),
-      { selector: "edge[type='REALLY_WANTS']", style: { "line-style": "dashed" } },
-    ],
-    layout: { name: "cose", animate: false, nodeRepulsion: 9000, idealEdgeLength: 70, padding: 30 },
-    wheelSensitivity: 0.3,
-  });
-  cy.on("tap", "node", (evt) => showNode(evt.target.id(), false));
-  applyFilters();
-}
-
-function selectView(id) {
-  document.querySelectorAll("main").forEach((m) => m.classList.toggle("active", m.id === id));
-  document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-selected", b.dataset.view === id));
-  if (id === "graph-view") { initGraph(); if (cy) cy.resize(); }
-}
-
-document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => selectView(b.dataset.view)));
-document.querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
-  c.setAttribute("aria-pressed", c.getAttribute("aria-pressed") !== "true");
-  applyFilters();
-}));
-$("#search").addEventListener("input", applyFilters);
-
-fetch("graph.json").then((r) => r.json()).then((data) => {
-  graph = data;
-  byId = Object.fromEntries(graph.nodes.map((n) => [n.id, n]));
-  const verified = graph.edges.filter((e) => e.status === "verified").length;
-  $("#stats").textContent = `${graph.nodes.length} nodes · ${graph.edges.length} edges · ${verified} verified · ${graph.bounties.length} open gaps`;
-  renderBounties();
-}).catch(() => { $("#bounties").textContent = "Could not load graph.json. Run: python tools/ntgraph.py build"; });
-</script>
+<script src="vendor/force-graph.min.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

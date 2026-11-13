@@ -1,6 +1,6 @@
 # The project-generating edges. Everything here is a seed hypothesis
 # (status defaults to "unverified") until a Cartographer confirms it with the
-# actor or maintainer concerned and adds `evidence` + `verified_by`.
+# actor or project concerned and adds `evidence` + `verified_by`.
 edges:
   # --- ADDRESSES: existing tech that covers a problem, fully or partially ---
   - {from: mne-bids, type: ADDRESSES, to: consumer-eeg-bids-export, coverage: partial,
@@ -22,6 +22,8 @@ edges:
   - {from: muse-js, type: ADDRESSES, to: browser-acquisition-stack, coverage: partial,
      note: "Muse only."}
   - {from: neuroconv, type: ADDRESSES, to: nwb-bids-interop, coverage: partial}
+  - {from: perceive, type: ADDRESSES, to: sensing-dbs-data-tooling, coverage: partial,
+     note: "MATLAB only; one vendor's export format."}
   - {from: autoreject, type: ADDRESSES, to: dry-electrode-artifact-rejection, coverage: partial,
      note: "Designed around interpolation across many channels."}
   - {from: moabb, type: ADDRESSES, to: ml-ready-harmonised-eeg, coverage: partial,
@@ -77,6 +79,12 @@ edges:
   - {from: dandi-archive, type: REALLY_WANTS, to: nwb-bids-interop}
   - {from: openneuro, type: REALLY_WANTS, to: nwb-bids-interop}
 
+  - {from: lead-dbs, type: REALLY_WANTS, to: sensing-dbs-data-tooling}
+  - {from: mne-bids, type: REALLY_WANTS, to: sensing-dbs-data-tooling}
+  - {from: mne-lsl, type: REALLY_WANTS, to: eeg-triggered-stimulation-toolkit}
+  - {from: timeflux, type: REALLY_WANTS, to: eeg-triggered-stimulation-toolkit}
+  - {from: simnibs, type: REALLY_WANTS, to: eeg-triggered-stimulation-toolkit}
+
   # --- BLOCKS: bottleneck -> capability it holds back ---
   - {from: ble-timing-jitter, type: BLOCKS, to: consumer-grade-erp-research}
   - {from: dry-electrode-artifact-rejection, type: BLOCKS, to: consumer-grade-erp-research}
@@ -88,3 +96,6 @@ edges:
   - {from: cross-platform-ble-lsl-bridges, type: BLOCKS, to: device-agnostic-apps}
   - {from: ml-ready-harmonised-eeg, type: BLOCKS, to: cross-device-eeg-foundation-models}
   - {from: montage-harmonisation, type: BLOCKS, to: cross-device-eeg-foundation-models}
+  - {from: eeg-triggered-stimulation-toolkit, type: BLOCKS, to: open-closed-loop-neuromodulation}
+  - {from: low-latency-python-closed-loop, type: BLOCKS, to: open-closed-loop-neuromodulation}
+  - {from: sensing-dbs-data-tooling, type: BLOCKS, to: open-closed-loop-neuromodulation}

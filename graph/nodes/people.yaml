@@ -1,0 +1,40 @@
+# People, limited to publicly known roles on projects and organisations in the graph.
+defaults: {type: person}
+nodes:
+  - {id: alexandre-gramfort, name: Alexandre Gramfort, description: "Co-founder of MNE-Python."}
+  - {id: eric-larson, name: Eric Larson, description: "Core maintainer of MNE-Python."}
+  - {id: mainak-jas, name: Mainak Jas, description: "Author of autoreject."}
+  - {id: andrey-parfenov, name: Andrey Parfenov, description: "Creator of BrainFlow."}
+  - {id: alexandre-barachant, name: Alexandre Barachant, description: "Creator of muselsl and pyRiemann."}
+  - {id: raphael-vallat, name: Raphael Vallat, description: "Creator of YASA."}
+  - {id: christian-kothe, name: Christian Kothe, description: "Creator of Lab Streaming Layer."}
+  - {id: arnaud-delorme, name: Arnaud Delorme, description: "Lead developer of EEGLAB."}
+  - {id: scott-makeig, name: Scott Makeig, description: "Founding director of SCCN; co-creator of EEGLAB."}
+  - {id: robert-oostenveld, name: Robert Oostenveld, description: "Lead developer of FieldTrip."}
+  - {id: jonathan-peirce, name: Jonathan Peirce, description: "Creator of PsychoPy."}
+  - {id: marius-pachitariu, name: Marius Pachitariu, description: "Creator of Kilosort."}
+  - {id: uri-shaked, name: Uri Shaked, description: "Creator of muse-js."}
+  - {id: john-griffiths, name: John Griffiths, description: "Lead of EEG-ExPy."}
+  - {id: robin-schirrmeister, name: Robin Tibor Schirrmeister, description: "Creator of Braindecode."}
+  - {id: bruno-aristimunha, name: Bruno Aristimunha, description: "Maintainer of Braindecode and MOABB."}
+  - {id: sylvain-chevallier, name: Sylvain Chevallier, description: "Maintainer of MOABB."}
+  - {id: alessio-buccino, name: Alessio Buccino, description: "Core developer of SpikeInterface."}
+  - {id: josh-siegle, name: Josh Siegle, description: "Co-founder of Open Ephys."}
+  - {id: russ-poldrack, name: Russell Poldrack, description: "Founder of OpenNeuro."}
+  - {id: oscar-esteban, name: Oscar Esteban, description: "Lead developer of fMRIPrep."}
+  - {id: clemens-brunner, name: Clemens Brunner, description: "Maintainer of pyxdf."}
+  - {id: pierre-clisson, name: Pierre Clisson, description: "Creator of Timeflux."}
+  - {id: ben-dichter, name: Ben Dichter, description: "Founder of CatalystNeuro."}
+  - {id: oliver-ruebel, name: Oliver Rübel, description: "Lead of NWB software development."}
+  - {id: yaroslav-halchenko, name: Yaroslav Halchenko, description: "Co-lead of DANDI."}
+  - {id: andreas-horn, name: Andreas Horn, description: "Creator of Lead-DBS."}
+  - {id: axel-thielscher, name: Axel Thielscher, description: "Lead of SimNIBS."}
+  - {id: viktor-jirsa, name: Viktor Jirsa, description: "Co-founder of The Virtual Brain."}
+  - {id: randy-mcintosh, name: Randy McIntosh, description: "Co-founder of The Virtual Brain."}
+  - {id: conor-russomanno, name: Conor Russomanno, description: "Co-founder of OpenBCI."}
+  - {id: aj-keller, name: AJ Keller, description: "Co-founder of Neurosity."}
+  - {id: ildar-rakhmatulin, name: Ildar Rakhmatulin, description: "Founder of PiEEG."}
+  - {id: tan-le, name: Tan Le, description: "Founder of EMOTIV."}
+  - {id: deepak-khatri, name: Deepak Khatri, description: "Founder of Upside Down Labs."}
+  - {id: tom-oxley, name: Tom Oxley, description: "Co-founder of Synchron."}
+  - {id: ana-maiques, name: Ana Maiques, description: "Co-founder of Neuroelectrics."}

@@ -1,0 +1,42 @@
+# Technologies. `class` is sensing, modulating, or both; `invasiveness` is invasive or noninvasive.
+defaults: {type: modality}
+nodes:
+  # --- sensing, noninvasive ---
+  - {id: eeg, class: sensing, invasiveness: noninvasive, name: EEG,
+     description: "Electroencephalography: scalp recording of electrical brain activity."}
+  - {id: meg, class: sensing, invasiveness: noninvasive, name: MEG,
+     description: "Magnetoencephalography: recording of the magnetic fields produced by neural currents."}
+  - {id: fmri, class: sensing, invasiveness: noninvasive, name: fMRI,
+     description: "Functional magnetic resonance imaging of blood-oxygenation changes."}
+  - {id: fnirs, class: sensing, invasiveness: noninvasive, name: fNIRS,
+     description: "Functional near-infrared spectroscopy of cortical haemodynamics."}
+  - {id: emg, class: sensing, invasiveness: noninvasive, name: EMG,
+     description: "Surface electromyography of muscle activity."}
+  # --- sensing, invasive ---
+  - {id: ecog, class: sensing, invasiveness: invasive, name: ECoG,
+     description: "Electrocorticography: electrode grids on the cortical surface."}
+  - {id: seeg, class: sensing, invasiveness: invasive, name: sEEG,
+     description: "Stereo-EEG: depth electrodes implanted in the brain."}
+  - {id: intracortical, class: sensing, invasiveness: invasive, name: Intracortical electrophysiology,
+     description: "Penetrating microelectrode arrays and probes recording spikes and local field potentials."}
+  - {id: endovascular, class: sensing, invasiveness: invasive, name: Endovascular electrodes,
+     description: "Electrode arrays delivered through blood vessels."}
+  # --- modulating, noninvasive ---
+  - {id: tes, class: modulating, invasiveness: noninvasive, name: tES (tDCS / tACS),
+     description: "Transcranial electrical stimulation with weak direct or alternating currents."}
+  - {id: tms, class: modulating, invasiveness: noninvasive, name: TMS,
+     description: "Transcranial magnetic stimulation."}
+  - {id: tfus, class: modulating, invasiveness: noninvasive, name: Focused ultrasound,
+     description: "Transcranial focused ultrasound neuromodulation."}
+  # --- modulating, invasive ---
+  - {id: dbs, class: modulating, invasiveness: invasive, name: DBS,
+     description: "Deep brain stimulation through implanted electrodes."}
+  - {id: vns, class: modulating, invasiveness: invasive, name: VNS,
+     description: "Implanted vagus nerve stimulation."}
+  - {id: scs, class: modulating, invasiveness: invasive, name: Spinal cord stimulation,
+     description: "Implanted epidural stimulation of the spinal cord."}
+  - {id: cochlear-implant, class: modulating, invasiveness: invasive, name: Cochlear implant,
+     description: "Electrical stimulation of the auditory nerve."}
+  # --- both ---
+  - {id: rns, class: [sensing, modulating], invasiveness: invasive, name: Responsive neurostimulation,
+     description: "Implanted closed-loop systems that sense brain activity and stimulate in response."}

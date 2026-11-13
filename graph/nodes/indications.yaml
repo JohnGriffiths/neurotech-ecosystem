@@ -1,0 +1,12 @@
+# What clinical neurotechnology diagnoses or treats.
+defaults: {type: indication}
+nodes:
+  - {id: epilepsy, name: Epilepsy, description: "Recurrent seizures, including drug-resistant focal epilepsy."}
+  - {id: parkinsons-disease, name: "Parkinson's disease", description: "Progressive movement disorder."}
+  - {id: essential-tremor, name: Essential tremor, description: "Action tremor, most often of the hands."}
+  - {id: dystonia, name: Dystonia, description: "Involuntary sustained muscle contractions."}
+  - {id: major-depression, name: Major depressive disorder, description: "Including treatment-resistant depression."}
+  - {id: ocd, name: Obsessive-compulsive disorder, description: "Obsessions and compulsions."}
+  - {id: chronic-pain, name: Chronic pain, description: "Persistent neuropathic and back pain."}
+  - {id: paralysis, name: Severe paralysis, description: "Loss of movement or speech from spinal cord injury, ALS or stroke."}
+  - {id: hearing-loss, name: Severe hearing loss, description: "Sensorineural hearing loss."}

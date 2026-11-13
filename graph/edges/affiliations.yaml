@@ -1,0 +1,40 @@
+# person -> org, or org -> parent org.
+defaults: {type: AFFILIATED_WITH}
+edges:
+  # labs and their institutions
+  - {from: sccn, to: ucsd}
+  - {from: donders, to: radboud-university}
+  - {from: poldrack-lab, to: stanford}
+  - {from: temple-nedc, to: temple-university}
+  - {from: mit-lcp, to: mit}
+  # people
+  - {from: alexandre-gramfort, to: mne-tools}
+  - {from: eric-larson, to: mne-tools}
+  - {from: mainak-jas, to: mne-tools}
+  - {from: andrey-parfenov, to: brainflow-dev}
+  - {from: alexandre-barachant, to: pyriemann-dev}
+  - {from: arnaud-delorme, to: sccn}
+  - {from: scott-makeig, to: sccn}
+  - {from: robert-oostenveld, to: donders}
+  - {from: jonathan-peirce, to: open-science-tools}
+  - {from: marius-pachitariu, to: hhmi-janelia}
+  - {from: john-griffiths, to: camh}
+  - {from: john-griffiths, to: university-of-toronto}
+  - {from: john-griffiths, to: neurotechx}
+  - {from: robin-schirrmeister, to: braindecode-dev}
+  - {from: bruno-aristimunha, to: braindecode-dev}
+  - {from: alessio-buccino, to: spikeinterface-dev}
+  - {from: josh-siegle, to: open-ephys}
+  - {from: russ-poldrack, to: poldrack-lab}
+  - {from: oscar-esteban, to: nipreps}
+  - {from: pierre-clisson, to: timeflux-dev}
+  - {from: ben-dichter, to: catalystneuro}
+  - {from: oliver-ruebel, to: nwb-community}
+  - {from: yaroslav-halchenko, to: dandi-team}
+  - {from: conor-russomanno, to: openbci}
+  - {from: aj-keller, to: neurosity}
+  - {from: ildar-rakhmatulin, to: pieeg}
+  - {from: tan-le, to: emotiv}
+  - {from: deepak-khatri, to: upside-down-labs}
+  - {from: tom-oxley, to: synchron}
+  - {from: ana-maiques, to: neuroelectrics}

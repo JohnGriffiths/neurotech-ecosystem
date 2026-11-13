@@ -13,6 +13,8 @@ nodes:
      description: "Invasive electrophysiology lives in NWB, human neuroimaging in BIDS. Datasets spanning both need duplicated metadata and bespoke conversion."}
   - {id: browser-acquisition-stack, name: Browser-native acquisition and streaming stack,
      description: "Web Bluetooth clients exist for single devices, but there is no shared browser-side abstraction with timing guarantees and standard export."}
+  - {id: sensing-dbs-data-tooling, name: Open tooling for sensing-enabled DBS recordings,
+     description: "Implanted stimulators can now record local field potentials, but exports are vendor-specific. Converting them into standard formats and analysis pipelines is ad hoc."}
 
   # --- benchmarks and validation ---
   - {id: cross-device-signal-quality-benchmark, name: Open cross-device signal quality benchmark,
@@ -30,11 +32,13 @@ nodes:
   - {id: montage-harmonisation, name: Cross-montage channel harmonisation,
      description: "Models trained on one electrode layout do not transfer to another. No standard open method maps arbitrary low-density montages into a shared representation."}
 
-  # --- signal processing ---
+  # --- signal processing and control ---
   - {id: dry-electrode-artifact-rejection, name: "Artifact rejection for dry, low-channel EEG",
      description: "Mainstream artifact methods (ICA, interpolation-based repair) assume many gel channels. Few-channel dry recordings need different, openly validated methods."}
   - {id: low-latency-python-closed-loop, name: Low-latency closed-loop processing in Python,
      description: "Building a sub-50 ms acquire-process-feedback loop in Python requires stitching several libraries, with no reference latency measurements."}
+  - {id: eeg-triggered-stimulation-toolkit, name: Open toolkit for EEG-triggered stimulation,
+     description: "Brain-state-dependent TMS and tES need real-time phase estimation and stimulator triggering. Existing set-ups are bespoke or proprietary."}
   - {id: low-cost-fnirs-pipeline, name: Open pipeline for low-cost fNIRS,
      description: "Hobbyist and low-cost fNIRS hardware lacks a shared acquisition-to-SNIRF path and quality-control tooling."}
 
@@ -47,3 +51,5 @@ nodes:
      description: "Pretrained models that work across clinical, research and consumer montages."}
   - {id: device-agnostic-apps, kind: capability, name: Device-agnostic neurotech applications,
      description: "Applications that run unchanged across headsets from different vendors."}
+  - {id: open-closed-loop-neuromodulation, kind: capability, name: Open closed-loop neuromodulation research,
+     description: "Labs able to run and reproduce brain-state-dependent stimulation studies on shared open tooling."}

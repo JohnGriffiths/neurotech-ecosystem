@@ -27,7 +27,11 @@ Pick one. Nobody has to do everything.
 
 Ground rules:
 
+- To add a project, add one entry to `graph/nodes/projects.yaml` with its `repo: owner/name` and
+  `modalities`, then a `MAINTAINS` edge from its organisation or maintainer.
 - New edges are `unverified` unless you supply `evidence` and `verified_by`.
+- Only add people in their public role on a project or organisation, and only with a public source.
+- Clinical indications need a regulator or trial-registry link before they can be marked verified.
 - Do not attribute a want to a company, lab or project without a public source or their say-so. If you
   believe the need exists but cannot source it, leave the edge `unverified`.
 - To second an existing want, add your GitHub handle to that edge's `endorsed_by` list.
@@ -36,9 +40,9 @@ Ground rules:
 
 ## From gap to project
 
-1. A gap rises on the bounty board.
+1. A gap rises on the open gaps board.
 2. A lead copies [docs/rfcs/0000-template.md](docs/rfcs/0000-template.md) and opens a pull request.
 3. The RFC is accepted when it has an input/output contract, a definition of done, a timebox of eight
    weeks or less, a named lead, and at least one verified `REALLY_WANTS` edge behind it.
-4. Builders work the issues. When it ships, a Cartographer adds the new tech node and an `ADDRESSES` edge,
+4. Builders work the issues. When it ships, a Cartographer adds the new project node and an `ADDRESSES` edge,
    and the gap drops off the board.

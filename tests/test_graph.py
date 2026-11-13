@@ -7,10 +7,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import ntgraph  # noqa: E402
 
 NODES = [
-    {"id": "lab", "type": "actor", "kind": "lab", "name": "Lab", "description": "d"},
-    {"id": "lib", "type": "tech", "kind": "software", "layer": "processing", "name": "Lib", "description": "d"},
-    {"id": "idea", "type": "tech", "kind": "software", "layer": "processing", "status": "proposed",
+    {"id": "lab", "type": "org", "kind": "lab", "name": "Lab", "description": "d"},
+    {"id": "ada", "type": "person", "name": "Ada", "description": "d"},
+    {"id": "lib", "type": "project", "kind": "software", "layer": "processing", "repo": "o/lib",
+     "modalities": ["eeg"], "name": "Lib", "description": "d"},
+    {"id": "idea", "type": "project", "kind": "software", "layer": "processing", "status": "proposed",
      "name": "Idea", "description": "d"},
+    {"id": "implant", "type": "device", "modalities": ["dbs"], "name": "Implant", "description": "d"},
+    {"id": "eeg", "type": "modality", "class": "sensing", "invasiveness": "noninvasive", "name": "EEG", "description": "d"},
+    {"id": "dbs", "type": "modality", "class": "modulating", "invasiveness": "invasive", "name": "DBS", "description": "d"},
+    {"id": "tremor", "type": "indication", "name": "Tremor", "description": "d"},
     {"id": "gap", "type": "problem", "kind": "bottleneck", "name": "Gap", "description": "d"},
     {"id": "goal", "type": "problem", "kind": "capability", "name": "Goal", "description": "d"},
 ]
@@ -28,12 +34,14 @@ def test_seed_graph_is_valid():
     nodes, edges, errors, _ = ntgraph.load()
     assert errors == []
     assert len(nodes) >= 50
+    repos = [n for n in nodes if n["type"] == "project" and n.get("repo")]
+    assert len(repos) >= 40
     assert ntgraph.bounties(nodes, edges)
 
 
 def test_edge_endpoint_types_enforced(tmp_path):
     *_, errors, _ = write_graph(tmp_path, [{"from": "lab", "type": "DEPENDS_ON", "to": "lib"}])
-    assert any("DEPENDS_ON must go tech -> tech" in e for e in errors)
+    assert any("DEPENDS_ON must go project -> project" in e for e in errors)
 
 
 def test_unknown_node_and_duplicate_edge(tmp_path):
@@ -75,3 +83,33 @@ def test_bounty_scoring_and_closure(tmp_path):
     loaded.append({"from": "lib", "type": "ADDRESSES", "to": "gap", "coverage": "full", "status": "unverified"})
     loaded[:] = [e for e in loaded if not (e["from"] == "lib" and e.get("coverage") == "partial")]
     assert "gap" not in {b["id"] for b in ntgraph.bounties(nodes, loaded)}
+
+
+def test_project_needs_repo_or_url(tmp_path):
+    nodes = [{"id": "x", "type": "project", "kind": "software", "layer": "ml", "name": "X", "description": "d"}]
+    *_, errors, _ = write_graph(tmp_path, [], nodes)
+    assert any("needs a repo" in e for e in errors)
+
+
+def test_modalities_shorthand_and_facets(tmp_path):
+    edges = [
+        {"from": "lab", "type": "MAINTAINS", "to": "lib"},
+        {"from": "lab", "type": "MAINTAINS", "to": "implant"},
+        {"from": "ada", "type": "AFFILIATED_WITH", "to": "lab"},
+        {"from": "implant", "type": "INDICATED_FOR", "to": "tremor", "stage": "approved"},
+    ]
+    nodes, loaded, errors, _ = write_graph(tmp_path, edges)
+    assert errors == []
+    assert {"from": "lib", "type": "USES", "to": "eeg"}.items() <= next(
+        e for e in loaded if e["type"] == "USES" and e["from"] == "lib").items()
+    facets = ntgraph.derive(nodes, loaded)
+    assert facets["lib"] == {"class": ["sensing"], "invasiveness": ["noninvasive"], "modalities": ["eeg"], "clinical": False}
+    assert facets["implant"]["clinical"] and facets["implant"]["class"] == ["modulating"]
+    assert facets["tremor"]["invasiveness"] == ["invasive"] and facets["tremor"]["clinical"]
+    assert facets["lab"]["class"] == ["modulating", "sensing"]
+    assert facets["ada"]["modalities"] == ["dbs", "eeg"]
+
+
+def test_indicated_for_needs_stage(tmp_path):
+    *_, errors, _ = write_graph(tmp_path, [{"from": "implant", "type": "INDICATED_FOR", "to": "tremor"}])
+    assert any("needs stage" in e for e in errors)
