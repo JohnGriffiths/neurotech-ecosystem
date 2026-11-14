@@ -40,6 +40,21 @@
       <p class="layout-note" id="layout-note" hidden></p>
     </section>
     <section>
+      <h2>Size by</h2>
+      <div class="seg" id="size-by" role="radiogroup" aria-label="Size organisations by">
+        <button role="radio" aria-checked="true" data-v="auto">Default</button>
+        <button role="radio" aria-checked="false" data-v="employees">Staff</button>
+        <button role="radio" aria-checked="false" data-v="funding">Funding</button>
+        <button role="radio" aria-checked="false" data-v="revenue">Revenue</button>
+      </div>
+      <div class="seg" id="size-scale" role="radiogroup" aria-label="Size scale" hidden>
+        <button role="radio" aria-checked="true" data-v="tier">Tiers</button>
+        <button role="radio" aria-checked="false" data-v="number">Numbers</button>
+      </div>
+      <ul class="legend" id="size-legend"></ul>
+      <p class="layout-note" id="size-note" hidden></p>
+    </section>
+    <section>
       <h2>Colour by</h2>
       <div class="seg" id="lens" role="radiogroup" aria-label="Colour by">
         <button role="radio" aria-checked="true" data-v="type">Entity</button>

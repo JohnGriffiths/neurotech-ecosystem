@@ -61,6 +61,8 @@ node tools/make_world_data.js         # regenerate web/world.json (needs world-a
 - `graph/places.json`, `graph/electrodes.json`, `web/brain.json` and `web/world.json` are generated and
   committed. Do not hand-edit them. Hand-curated reference data is `graph/locations.yaml` (organisation
   headquarters) and `graph/regions.yaml` (named brain targets); both are from memory and unverified.
+- `graph/metrics.yaml` holds researched size figures (employees, funding, revenue) with a source and a
+  quality label on each. Never add a figure without a source, and prefer leaving it out to guessing.
 - Node ids are `lowercase-kebab-case` and must never be renamed once merged (they are deep-link targets).
 
 ## How the viewer is put together

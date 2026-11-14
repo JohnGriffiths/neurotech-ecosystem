@@ -156,3 +156,29 @@ def test_locations_file_applies_to_orgs():
     assert errors == []
     by_id = {n["id"]: n for n in nodes}
     assert (by_id["interaxon"]["city"], by_id["interaxon"]["country"]) == ("Toronto", "Canada")
+
+
+def test_metric_tiers_and_validation(tmp_path):
+    assert [ntgraph.tier_of("employees", n) for n in (1, 10, 11, 50, 51, 1000, 1001, 10000, 10001)] == [1, 1, 2, 2, 3, 4, 5, 5, 6]
+    assert [ntgraph.tier_of("funding", x) for x in (999_999, 1e6, 49e6, 50e6, 2e9)] == [1, 2, 3, 4, 6]
+    ranged = ntgraph.metric_summary("employees", {"low": 51, "high": 200, "quality": "estimate", "as_of": "2025", "source": "x"})
+    assert ranged["tier"] == 3 and ranged["range_tiers"] == [3, 3] and 100 < ranged["mid"] < 102
+    euro = ntgraph.metric_summary("revenue", {"value": 10e9, "currency": "EUR", "quality": "reported", "as_of": "2025", "source": "x"})
+    assert euro["amount"] == 11e9 and euro["tier"] == 6          # EUR is converted before tiering
+    good = {"employees": {"value": 40, "quality": "estimate", "as_of": "2025", "source": "s"}}
+    bad = {"employees": {"low": 9, "high": 3, "quality": "guess", "as_of": "soon"}, "profit": {"value": 1}}
+    nodes = [{"id": "ok", "type": "org", "kind": "company", "name": "Ok", "description": "d", "metrics": good},
+             {"id": "no", "type": "org", "kind": "company", "name": "No", "description": "d", "metrics": bad}]
+    _, _, errors, _ = write_graph(tmp_path, [], nodes)
+    joined = " ".join(errors)
+    assert all(text in joined for text in ("low is above high", "quality must be", "as_of must be", "needs a source", "unknown metric"))
+    assert not any(e.startswith("graph/nodes/n.yaml:nodes[0]") for e in errors)
+
+
+def test_real_metrics_resolve_and_export():
+    nodes, edges, errors, _ = ntgraph.load()
+    assert errors == []
+    exported = {n["id"]: n for n in ntgraph.export(nodes, edges)["nodes"]}
+    assert exported["medtronic"]["metrics"]["employees"]["tier"] == 6
+    assert exported["openbci"]["metrics"]["employees"]["range_tiers"] == [2, 2]
+    assert "metrics" not in exported["mne-python"]

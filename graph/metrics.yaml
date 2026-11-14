@@ -1,0 +1,106 @@
+# Size of organisations: employees, total funding raised, and annual revenue.
+#
+# Gathered by web search in November 2026 from the sources named on each line. Nothing here was read from
+# a primary filing directly: public companies' figures come from search results that quote their annual
+# reports or press releases, and private companies' figures from aggregators (Dealroom, PitchBook, CB
+# Insights, Revelio, Growjo and similar) that often disagree with each other.
+#
+# Each metric is either `value` or a `low` / `high` range, plus:
+#   quality   reported  the company's own figure as quoted by a secondary source
+#             estimate  a third-party aggregator's estimate, or a range across several that disagree
+#   as_of     when the figure applies (not when it was looked up)
+#   source    a URL; `note` carries anything a reader should know
+#   currency  for money, if not USD (converted at fixed approximate rates for tiers and sizing only)
+# Where sources conflict the range spans them. Where they conflicted too badly, or none was found, the
+# metric is simply left out: most organisations have no entry, and "unknown" is the normal state.
+metrics:
+  # ---------------------------------------------------------------- large public companies
+  medtronic:
+    employees: {value: 95000, as_of: "2025-04", quality: reported, source: "https://stockanalysis.com/stocks/mdt/employees/", note: "As of 25 April 2025, from the SEC filing as quoted by StockAnalysis. Revelio estimates 95,670."}
+  abbott:
+    employees: {value: 115000, low: 114000, high: 122000, as_of: "2025", quality: reported, source: "https://www.bccresearch.com/company-index/profile/abbott", note: "Sources give 114,000 to 122,000; 115,000 is the most common."}
+    revenue: {value: 44330000000, as_of: "2025", quality: reported, source: "https://stockanalysis.com/quote/bit/1ABT/revenue", note: "Fiscal 2025."}
+  boston-scientific:
+    employees: {value: 59000, as_of: "2025", quality: reported, source: "https://investors.bostonscientific.com/~/media/Files/B/Boston-Scientific-IR-V3/2025-annual-report.pdf", note: "Approximate, from the 2025 annual report."}
+    revenue: {value: 20074000000, as_of: "2025", quality: reported, source: "https://news.bostonscientific.com/2026-02-04-Boston-Scientific-announces-results-for-fourth-quarter-and-full-year-2025", note: "Net sales, full year 2025."}
+  siemens-healthineers:
+    employees: {value: 74000, as_of: "2025-09", quality: reported, source: "https://www.siemens-healthineers.com/press/releases/2025q4", note: "Approximate, end of fiscal 2025."}
+    revenue: {value: 23400000000, currency: EUR, as_of: "2025-09", quality: reported, source: "https://www.siemens-healthineers.com/press/releases/2025q4", note: "Fiscal 2025, about EUR 23.4 billion."}
+  ge-healthcare:
+    employees: {value: 54000, as_of: "2025", quality: reported, source: "https://www.bccresearch.com/company-index/profile/ge-healthcare", note: "One aggregator shows 53,000, which matches the 2024 figure."}
+    revenue: {value: 20625000000, as_of: "2025", quality: reported, source: "https://bullfincher.io/companies/ge-healthcare-technologies/revenue", note: "Fiscal 2025."}
+  meta:
+    employees: {value: 78865, low: 76834, high: 78865, as_of: "2025-12", quality: reported, source: "https://stockanalysis.com/stocks/meta/employees/", note: "The whole company, not Reality Labs. Sources differ by about 2,000."}
+    revenue: {value: 200970000000, as_of: "2025", quality: reported, source: "https://www.quantisnow.com/insight/meta-reports-third-quarter-2025-results-6249845", note: "The whole company, full year 2025."}
+  cochlear:
+    employees: {value: 5500, as_of: "2025-06", quality: reported, source: "https://stockanalysis.com/quote/asx/COH/employees/", note: "As of 30 June 2025."}
+    revenue: {value: 2356000000, currency: AUD, as_of: "2025-06", quality: reported, source: "https://www.sustainabilityreports.com/cochlear/2025/annual-report", note: "Sales revenue, financial year to 30 June 2025."}
+  livanova:
+    employees: {value: 3000, as_of: "2025-11", quality: reported, source: "https://www.barchart.com/story/news/35914781/livanova-reports-third-quarter-2025-results-raises-2025-guidance", note: "Approximate, from the company's third-quarter 2025 release."}
+    revenue: {value: 1388100000, as_of: "2025", quality: reported, source: "https://www.biopharmawatch.com/news/LIVN/livanova-reports-q4-full-year-2025-results-2026-guidance", note: "Net revenue, full year 2025."}
+  neuronetics:
+    employees: {value: 199, as_of: "2025", quality: estimate, source: "https://dealroom.co/companies/neuronetics/", note: "Dealroom's figure; not checked against the 10-K."}
+    revenue: {value: 149200000, as_of: "2025", quality: reported, source: "https://qnow.quantisnow.com/insight/neuronetics-reports-fourth-quarter-and-full-year-2025-financial-6451114", note: "Full year 2025. Roughly half came from the clinics acquired with Greenbrook."}
+  brainsway:
+    employees: {low: 120, high: 129, as_of: "2025", quality: estimate, source: "https://stockanalysis.com/quote/tlv/BWAY/revenue/", note: "Snapshots from different dates."}
+    revenue: {value: 52200000, as_of: "2025", quality: reported, source: "https://www.santelog.com/actualites-sante-nasdaq/brainsway-reports-fourth-quarter-and-full-year-2025-financial-results-and", note: "Full year 2025."}
+  neuropace:
+    revenue: {value: 100000000, as_of: "2025", quality: reported, source: "https://www.barchart.com/story/news/544579/neuropace-reports-fourth-quarter-and-full-year-2025-financial-results-and-reiterates-2026-outlook", note: "Full year 2025."}
+
+  # ---------------------------------------------------------------- private companies (aggregator estimates)
+  neuralink:
+    employees: {low: 484, high: 492, as_of: "2026-03", quality: estimate, source: "https://pitchbook.com/profiles/company/179115-22", note: "PitchBook 492; Revelio 484 in March 2026."}
+    funding: {low: 686000000, high: 1340000000, as_of: "2025-05", quality: estimate, source: "https://pitchbook.com/profiles/company/179115-22", note: "PitchBook $1.34B including the May 2025 round; another source gives about $686M."}
+  synchron:
+    funding: {value: 345000000, as_of: "2025-11", quality: reported, source: "https://www.medtechdive.com/news/synchron-funding-bci-200m/804977/", note: "Several outlets, after the $200M Series D announced November 2025. No headcount found."}
+  paradromics:
+    employees: {low: 51, high: 112, as_of: "2025", quality: estimate, source: "https://dealroom.co/companies/paradromics/", note: "Aggregators range from 51 to 112."}
+    funding: {low: 57300000, high: 121000000, as_of: "2025-12", quality: estimate, source: "https://www.cbinsights.com/company/paradromics/financials", note: "Aggregators range from $57M to $121M; includes a $7M venture-debt deal in December 2025."}
+  blackrock-neurotech:
+    employees: {value: 191, as_of: "2025", quality: estimate, source: "https://dealroom.co/companies/blackrock-neurotech/", note: "Dealroom."}
+    funding: {value: 200000000, as_of: "2024-04", quality: reported, source: "https://www.massdevice.com/bci-blackrock-neurotech-200m-investment-tether/", note: "Tether's investment alone, at a valuation of about $350M. Total raised is not known, so this is a lower bound."}
+  kernel:
+    employees: {low: 58, high: 100, as_of: "2024", quality: estimate, source: "https://www.thecompanycheck.com/company/b/kernel/wccdpyx0hao6d0ceg", note: "100 in 2020 per the company; aggregators now show about 58 to 60."}
+    funding: {low: 107000000, high: 212300000, as_of: "2024", quality: estimate, source: "https://www.crunchbase.com/organization/kernel-co", note: "$107M reported in 2020; later aggregators give $158M to $212M."}
+  openbci:
+    employees: {low: 18, high: 24, as_of: "2025-02", quality: estimate, source: "https://village.ai/company/openbci", note: "Bootstrapped and, per the 2021 coverage, profitable since inception."}
+    funding: {low: 2060000, high: 4000000, as_of: "2021-12", quality: estimate, source: "https://www.biometricupdate.com/202112/openbci-raise-funds-to-further-biometric-mixed-reality-platform-development", note: "First venture round December 2021; aggregators differ."}
+  interaxon:
+    employees: {low: 21, high: 200, as_of: "2025", quality: estimate, source: "https://wellfound.com/company/interaxon-muse", note: "Wellfound lists 51-200, Welcome to the Jungle 21-100. Low confidence."}
+    funding: {low: 17200000, high: 58560000, as_of: "2022", quality: estimate, source: "https://www.cbinsights.com/company/interaxon/financials", note: "Aggregators range from $17M to $59M; individual rounds from $6M to $14.8M."}
+  emotiv:
+    employees: {low: 80, high: 103, as_of: "2023-07", quality: estimate, source: "https://pitchbook.com/profiles/company/103988-71", note: "Several aggregators; 51-200 on Techstars."}
+    funding: {low: 5660000, high: 12000000, as_of: "2024-01", quality: estimate, source: "https://www.thecompanycheck.com/company/b/emotiv/jyi2af24dmwlkuua2", note: "Aggregators differ; mostly crowdfunding and small rounds."}
+  neurosity:
+    employees: {low: 1, high: 10, as_of: "2025", quality: estimate, source: "https://fundediq.co/neurosity-neurosity-co-funding/", note: "A single aggregator's range."}
+    funding: {low: 4980000, high: 5990000, as_of: "2024-01", quality: estimate, source: "https://www.cbinsights.com/company/neurosity/financials", note: "Includes crowdfunding."}
+  gtec:
+    employees: {low: 46, high: 66, as_of: "2026", quality: estimate, source: "https://rocketreach.co/gtec-medical-engineering-gmbh-profile_b5decdb3f42e4f23", note: "Aggregators; no official figure."}
+    revenue: {low: 7500000, high: 7700000, as_of: "2026", quality: estimate, source: "https://rocketreach.co/gtec-medical-engineering-gmbh-profile_b5decdb3f42e4f23", note: "Modelled estimates, not accounts."}
+  neurable:
+    employees: {value: 38, as_of: "2025", quality: estimate, source: "https://dealroom.co/companies/neurable/", note: "Dealroom."}
+    funding: {low: 49000000, high: 100000000, as_of: "2025-12", quality: estimate, source: "https://insider.fitt.co/neurable-raises-35m-to-scale-noninvasive-brain-tech/", note: "Aggregators differ; includes a $35M round in December 2025."}
+  beacon-biosignals:
+    employees: {low: 40, high: 130, as_of: "2025", quality: estimate, source: "https://parsers.vc/startup/beacon.bio", note: "Aggregators disagree widely."}
+    funding: {value: 132000000, as_of: "2026-04", quality: reported, source: "https://www.massdevice.com/beacon-biosignals-86m-ai-eeg-wearable/", note: "Cumulative funding above $132M after an April 2026 Series B extension."}
+  flow-neuroscience:
+    funding: {low: 11600000, high: 11900000, as_of: "2021-08", quality: estimate, source: "https://www.cbinsights.com/company/flow-neuroscience/financials", note: "After the 2021 Series A; later rounds, if any, were not found."}
+  mendi:
+    employees: {low: 30, high: 35, as_of: "2025-10", quality: estimate, source: "https://www.caplight.com/company/mendi", note: "Other aggregators show 11-50."}
+    funding: {low: 5550000, high: 9250000, as_of: "2025", quality: estimate, source: "https://www.cbinsights.com/company/mendi-1/financials", note: "Includes about EUR 3M of crowdfunding in 2020."}
+  elemind:
+    employees: {low: 12, high: 13, as_of: "2024", quality: estimate, source: "https://spectrum.ieee.org/elemind-neuromodulation", note: "13 per IEEE Spectrum, 12 per PitchBook; LinkedIn lists 11-50."}
+    funding: {low: 12000000, high: 20000000, as_of: "2025-01", quality: estimate, source: "https://pitchbook.com/profiles/company/327318-67", note: "$12M seed in February 2024; PitchBook shows $20M."}
+  neuroelectrics:
+    employees: {low: 40, high: 64, as_of: "2021", quality: estimate, source: "https://www.businesswire.com/news/home/20210504005891/en", note: "40 per the 2021 release; PitchBook 64."}
+    funding: {low: 17500000, high: 18200000, as_of: "2021-05", quality: estimate, source: "https://www.businesswire.com/news/home/20210504005891/en", note: "$17.5M Series A, May 2021."}
+  magstim:
+    employees: {low: 51, high: 200, as_of: "2025", quality: estimate, source: "https://www.zoominfo.com/c/magstim/37652460", note: "Directory listings; no official figure."}
+    revenue: {low: 11457200, high: 24900000, as_of: "2025", quality: estimate, source: "https://prospeo.io/c/magstim-revenue", note: "Modelled estimates. Companies House accounts would be authoritative."}
+  magventure:
+    employees: {low: 165, high: 200, as_of: "2025", quality: estimate, source: "https://jobbank.dk/en/job/2635283/magventure-as/product-management-engineer", note: "A job listing says 200; aggregators 165 to 176."}
+    revenue: {value: 7500000, as_of: "2025", quality: estimate, source: "https://growjo.com/company/MagVenture", note: "A modelled figure, low confidence."}
+  brain-products:
+    employees: {low: 28, high: 55, as_of: "2026-01", quality: estimate, source: "https://leadiq.com/c/brain-products-gmbh/5a1d7c9e2400002400568777", note: "28 on a Bavarian company database; about 55 on LeadIQ."}
+  ant-neuro:
+    employees: {low: 51, high: 200, as_of: "2025", quality: estimate, source: "https://growjo.com/company/ANT_Neuro", note: "Aggregators give 78, 51-100, 51-200 and 101-250."}

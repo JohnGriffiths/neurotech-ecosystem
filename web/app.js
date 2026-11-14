@@ -49,7 +49,7 @@ const LINK_DISTANCE = { USES: 90, AFFILIATED_WITH: 30, MAINTAINS: 38 };
 
 const state = {
   lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: true,
-  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network", labels: false,
+  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network", labels: false, sizeBy: "auto", sizeScale: "tier",
 };
 const ref = {}; // reference geometry loaded on demand: ref.world (map outlines), ref.brain (template surface)
 const GLOBE_R = 230, MAP_K = 2.2;                       // globe radius; degrees-to-units scale of the flat map
@@ -130,7 +130,7 @@ function drawNode(n, ctx, scale) {
   const lit = isLit(n);
   const focus = n.id === state.selected || n.id === state.hovered;
   ctx.save();
-  ctx.globalAlpha = lit ? 1 : 0.1;
+  ctx.globalAlpha = lit ? (n.unknown ? 0.35 : 1) : 0.1;
   shapePath(ctx, shape, n.x, n.y, r);
   if (isHollow(n)) {
     ctx.fillStyle = C.bg; ctx.fill();
@@ -229,6 +229,25 @@ function bindSeg(sel, onChange) {
   }));
 }
 
+/** Tiers with how many organisations fall in each, for the metric chosen under "Size by". */
+function renderSizeLegend() {
+  const box = $("#size-legend");
+  $("#size-scale").hidden = state.sizeBy === "auto";
+  if (state.sizeBy === "auto") { box.replaceChildren(); $("#size-note").hidden = true; return; }
+  const orgs = graph.nodes.filter((n) => n.type === "org");
+  const counts = Array(6).fill(0);
+  let known = 0;
+  orgs.forEach((n) => { const m = n.metrics && n.metrics[state.sizeBy]; if (m) { counts[m.tier - 1]++; known++; } });
+  box.replaceChildren(...graph.scales[state.sizeBy].map((label, i) => el("li", { className: "static" },
+    el("span", { className: "tier", textContent: String(i + 1) }), label, el("span", { className: "n", textContent: counts[i] }))),
+    el("li", { className: "static" }, el("span", { className: "tier", textContent: "?" }), "unknown", el("span", { className: "n", textContent: orgs.length - known })));
+  const note = $("#size-note");
+  note.hidden = false;
+  note.textContent = `${known} of ${orgs.length} organisations have a figure; the rest are drawn small and faint. ` +
+    (state.sizeScale === "tier" ? "Size follows the tier." : "Size follows the figure on a log scale.") +
+    " Estimates from aggregators can be far off; see each organisation's detail for its source.";
+}
+
 function renderLegend() {
   const counts = {};
   graph.nodes.forEach((n) => { counts[n.type] = (counts[n.type] || 0) + 1; });
@@ -320,6 +339,20 @@ function renderDetail() {
     chips.length ? el("div", { className: "chips" }, ...chips.map((c) => el("span", { className: "tag", textContent: c }))) : null,
     el("p", { textContent: n.description }),
     ...[provenance, repo].filter(Boolean));
+  if (n.type === "org" && (n.metrics || state.sizeBy !== "auto")) {
+    const rows = Object.keys(METRIC_LABEL).filter((k) => (n.metrics && n.metrics[k]) || k === state.sizeBy);
+    panel.append(el("h3", { textContent: "Size" }), el("ul", { className: "rel" }, ...rows.map((k) => {
+      const m = n.metrics && n.metrics[k];
+      if (!m) return el("li", {}, `${METRIC_LABEL[k]}: `, el("span", { className: "tag", textContent: "unknown" }));
+      const same = m.currency && m.currency !== "USD" ? ` (about ${fmtMoney(m.amount)})` : "";
+      return el("li", {}, `${METRIC_LABEL[k]}: ${fmtMetric(k, m)}${same} `,
+        el("span", { className: "tag", textContent: graph.scales[k][m.tier - 1] }), " ",
+        el("span", { className: "tag", textContent: m.quality }), " ",
+        el("span", { className: "tag", textContent: `as of ${m.as_of}` }),
+        el("div", { className: "note" }, m.note ? `${m.note} ` : "", /^https?:/.test(m.source || "")
+          ? el("a", { href: m.source, target: "_blank", rel: "noopener", textContent: "source" }) : (m.source || "")));
+    })));
+  }
   if (n.geo) {
     panel.append(el("p", { className: "provenance", textContent: n.geo.precision === "city"
       ? "Map position: its city (approximate)." : "Map position: the centre of its country; the city is not known." }));
@@ -414,6 +447,40 @@ function bindSearch() {
 // --------------------------------------------------------------- renderers ---
 // Two interchangeable views of the same data: { fg, setData, restyle, focus, fit, resize, destroy }.
 
+// ---- sizes -----------------------------------------------------------------
+const METRIC_LABEL = { employees: "Employees", funding: "Funding raised", revenue: "Revenue" };
+const SIZE_RANGE = { network: [2.4, 13], map: [1.1, 6.5], brain: [2.4, 7] };            // radius for tier 1 .. tier 6
+const LOG_RANGE = { employees: [0.7, 5.2], funding: [5, 10.7], revenue: [5, 11.3] };    // log10 of the smallest and largest amount shown
+const CURRENCY_SYMBOL = { USD: "$", EUR: "€", GBP: "£", AUD: "A$", CAD: "C$", CHF: "CHF ", SEK: "SEK ", DKK: "DKK ", ILS: "₪", JPY: "¥" };
+
+/** Node radii: the default per layout, or, for organisations, the chosen size metric (tier or actual figure). */
+function applySizes() {
+  const layout = state.layout;
+  graph.nodes.forEach((n) => {
+    n.unknown = false;
+    n.r = layout === "network" ? n.r0 : layout === "map" ? 1.7 : 3.4;
+    if (state.sizeBy === "auto" || n.type !== "org") return;
+    const [lo, hi] = SIZE_RANGE[layout], m = n.metrics && n.metrics[state.sizeBy];
+    if (!m) { n.unknown = true; n.r = lo * 0.85; return; }   // most organisations have no figure: small and faint
+    let t;
+    if (state.sizeScale === "tier") t = (m.tier - 1) / 5;
+    else { const [a, b] = LOG_RANGE[state.sizeBy]; t = Math.min(1, Math.max(0, (Math.log10(m.amount) - a) / (b - a))); }
+    n.r = lo + (hi - lo) * Math.sqrt(t);
+  });
+}
+
+const fmtCount = (x) => Math.round(x).toLocaleString("en-GB");
+function fmtMoney(x, currency = "USD") {
+  const sym = CURRENCY_SYMBOL[currency] || `${currency} `;
+  const [v, unit] = x >= 1e9 ? [x / 1e9, "B"] : x >= 1e6 ? [x / 1e6, "M"] : x >= 1e3 ? [x / 1e3, "K"] : [x, ""];
+  return `${sym}${v >= 100 || unit === "" ? Math.round(v) : v.toFixed(v >= 10 ? 1 : 2).replace(/\.?0+$/, "")}${unit}`;
+}
+function fmtMetric(name, m) {
+  const f = (x) => (name === "employees" ? fmtCount(x) : fmtMoney(x, m.currency));
+  return m.low != null && m.high != null && (m.value == null || m.low !== m.high)
+    ? `${f(m.low)} to ${f(m.high)}` : `${name === "employees" ? "about " : ""}${f(m.value ?? m.mid)}`;
+}
+
 /** Scene position of the pin for each node in the current layout; `null` outside network layout. */
 function layoutPosition(n, three) {
   const point = state.layout === "map" ? n.geo : state.layout === "brain" ? n.brain && n.brain[0] : null;
@@ -425,7 +492,8 @@ function layoutPosition(n, three) {
 /** Pin nodes to their place in the Map or Brain layout, fanning out those that share one spot. */
 function pinNodes() {
   const three = state.mode === "3d";
-  graph.nodes.forEach((n) => { delete n.fx; delete n.fy; delete n.fz; n.r = state.layout === "network" ? n.r0 : state.layout === "map" ? 1.7 : 3.4; });
+  graph.nodes.forEach((n) => { delete n.fx; delete n.fy; delete n.fz; });
+  applySizes();
   if (state.layout === "network") return;
   const groups = new Map();
   graph.nodes.forEach((n) => {
@@ -644,7 +712,7 @@ function make3d(container) {
     const map = colors[1] && !o.hollow ? striped(colors[0], colors[1]) : null;
     if (map !== o.map) { m.map = map; o.map = map; m.needsUpdate = true; }
     m.color.set(map ? "#ffffff" : colors[0]);
-    m.opacity = lit ? 1 : 0.06; m.depthWrite = lit;
+    m.opacity = lit ? (n.unknown ? 0.35 : 1) : 0.06; m.depthWrite = lit && !n.unknown;
 
     if (o.sites) {
       o.sites.group.visible = state.layout === "brain" && lit;
@@ -958,6 +1026,10 @@ function initGraph() {
   $("#graph").addEventListener("pointerdown", () => { state.touched = true; if (state.rotate) setRotate(false); });
   $("#graph").addEventListener("wheel", () => { state.touched = true; }, { passive: true });
   bindSeg("#layout", (v) => { if (v !== state.layout) setLayout(v); });
+  const resize = () => { applySizes(); renderSizeLegend(); renderDetail(); view.restyle(); if (state.mode === "2d") view.fg.d3ReheatSimulation && state.layout === "network" && view.fg.d3ReheatSimulation(); };
+  bindSeg("#size-by", (v) => { state.sizeBy = v; resize(); });
+  bindSeg("#size-scale", (v) => { state.sizeScale = v; resize(); });
+  renderSizeLegend();
   if (["#map", "#brain"].includes(location.hash)) setLayout(location.hash.slice(1));
   bindSeg("#dims", (v) => {
     try { localStorage.setItem("dims", v); } catch (e) { /* private mode */ }

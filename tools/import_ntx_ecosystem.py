@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Import companies from an export of the NeuroTechX ecosystem database (2022 snapshot).
 
-    python tools/import_ntx_ecosystem.py path/to/companies.csv
+    python tools/import_ntx_ecosystem.py path/to/companies.csv [path/to/size.csv]
+
+The optional second file has columns name, funding_usd (the snapshot's free-text "Funding ($)" field, e.g.
+"$25.17M (4 Rounds - 2016)") and is used to give companies a funding amount where one can be parsed.
 
 Expects columns: name, website, type, technology, applications, city, country, with "|"-separated tag
 names in the three tag columns. Writes graph/nodes/orgs-ntx-ecosystem.yaml and prints what it did.
@@ -69,6 +72,29 @@ KIND_NOTE = {"Hardware", "Software", "Services", "Medical device", "Pharma", "Bi
              "Software as medicine", "Telemedicine"}
 
 
+FUNDING_RE = re.compile(r"^\s*(?:(?P<sym>[$€£])\s*)?(?P<num>\d[\d,]*(?:\.\d+)?)\s*(?P<unit>[kKmM])?\s*(?P<tail>\$|Pounds)?", re.IGNORECASE)
+
+
+def parse_funding(text: str) -> dict | None:
+    """Turn the snapshot's free-text funding, such as "$836k (1 round - 2009)", into a metric, or None.
+
+    Only a leading amount in dollars, euros or pounds is taken. "N/A", "Undisclosed", "IPO", stock tickers and
+    grants without an amount are skipped. The year in brackets, if any, becomes `as_of`.
+    """
+    m = FUNDING_RE.match(text or "")
+    if not m or not (m["sym"] or m["tail"]):
+        return None
+    amount = float(m["num"].replace(",", ""))
+    amount *= {"k": 1e3, "m": 1e6}.get((m["unit"] or "").lower(), 1)
+    currency = {"€": "EUR", "£": "GBP"}.get(m["sym"] or "", "GBP" if (m["tail"] or "").lower() == "pounds" else "USD")
+    year = re.search(r"\b(20[01]\d|202\d)\b", text)
+    metric = {"value": int(amount), "as_of": year.group(1) if year else "2022", "quality": "estimate",
+              "source": "NeuroTechX ecosystem database, 2022 snapshot (Funding field)", "note": f"As written in the source: {text.strip()}"}
+    if currency != "USD":
+        metric["currency"] = currency
+    return metric if metric["value"] > 0 else None
+
+
 def slug(text: str) -> str:
     text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
     text = text.replace("&", " and ").replace("+", " plus ")
@@ -96,7 +122,14 @@ def countries(cell: str) -> list[str]:
     return out
 
 
-def main(path: str) -> int:
+def main(path: str, funding_path: str | None = None) -> int:
+    funding: dict[str, dict] = {}
+    if funding_path:
+        with open(funding_path, newline="", encoding="utf-8") as fh:
+            for row in csv.DictReader(fh):
+                parsed = parse_funding(row.get("funding_usd", ""))
+                if parsed:
+                    funding[slug(row["name"])] = parsed
     existing = [n for f in sorted((ROOT / "graph" / "nodes").glob("*.yaml")) if f != OUT
                 for n in (yaml.safe_load(f.read_text()) or {}).get("nodes", [])]
     taken_ids = {n["id"] for n in existing}
@@ -155,6 +188,8 @@ def main(path: str) -> int:
                 node["city"] = place
             if mods:
                 node["modalities"] = mods
+            if nid in funding:
+                node["metrics"] = {"funding": funding[nid]}
             nodes[nid] = node
 
     lines = [
@@ -184,6 +219,7 @@ def main(path: str) -> int:
 
     print(f"wrote {OUT.relative_to(ROOT)}: {len(nodes)} companies")
     print(f"  {len(nodes) - unmapped} linked to at least one technology, {unmapped} with none")
+    print(f"  {sum(1 for n in nodes.values() if 'metrics' in n)} with a funding amount parsed")
     print(f"  {len(merged)} duplicate rows merged: {', '.join(merged) or '-'}")
     print(f"  {len(skipped)} rows skipped as already in the graph:")
     for name, match in skipped:
@@ -192,6 +228,6 @@ def main(path: str) -> int:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    if len(sys.argv) not in (2, 3):
         sys.exit(__doc__)
-    sys.exit(main(sys.argv[1]))
+    sys.exit(main(*sys.argv[1:]))

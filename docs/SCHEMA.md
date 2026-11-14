@@ -33,6 +33,33 @@ Notes:
 - `python tools/ntgraph.py check-repos` confirms that every `repo` is reachable on GitHub.
 - A `proposed` project is one that should exist but does not. It appears on the gaps board.
 
+## Size metrics
+
+Organisations can carry `metrics`: `employees`, `funding` (total raised) and `revenue`. Most have none, and
+"unknown" is the normal state. Each metric is a `value`, or a `low` and `high` range where sources
+disagree, plus `quality` (`reported`: the company's own figure as a secondary source quotes it; `estimate`:
+an aggregator's estimate), `as_of` (when it applies), `source` (a URL) and an optional `note`. Money may
+have a `currency`.
+
+Metrics live in `graph/metrics.yaml` (researched, keyed by organisation id) and, for the 2022 import, inline
+on the generated nodes. An entry in `metrics.yaml` overrides the import metric by metric.
+
+The build derives an ordinal **tier** from 1 (smallest) to 6, so the viewer can size by tier or by the
+actual figure. A range is placed by its geometric midpoint. Non-dollar amounts are converted at fixed
+approximate rates (`FX_TO_USD`) for tiering and sizing only.
+
+| Tier | Employees | Funding raised | Revenue |
+|---|---|---|---|
+| 1 | 1–10 | under $1M | under $1M |
+| 2 | 11–50 | $1–10M | $1–10M |
+| 3 | 51–200 | $10–50M | $10–100M |
+| 4 | 201–1,000 | $50–250M | $100M–1B |
+| 5 | 1,001–10,000 | $250M–1B | $1–10B |
+| 6 | over 10,000 | over $1B | over $10B |
+
+A fourth idea, mentions (how often an organisation is talked about), is not implemented: it needs an
+external source such as a literature or news index.
+
 ## Places and brain sites
 
 Two layouts in the viewer place nodes in space. Both rest on reference data that is generated, not

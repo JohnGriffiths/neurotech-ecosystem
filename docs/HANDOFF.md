@@ -74,6 +74,30 @@ switch to MNI coordinate space and place them where in the brain they are typica
   imported companies with no city sit at the centre of their country; tfus (focused ultrasound) has no
   device, so nothing is shown for it in the Brain layout.
 
+## Size metrics (employees, funding, revenue)
+
+Requested by the owner: a relative size for companies, both as an ordinal scale and as actual numbers.
+The viewer has **Size by** (Staff, Funding, Revenue) with **Tiers** or **Numbers**; unknown organisations
+are drawn small and faint, and the detail panel shows each figure with its quality, date and source.
+
+- **Coverage is thin.** 28 organisations have an employee figure, 91 a funding figure, 13 revenue, out of
+  630. Sources: 36 companies researched by web search in November 2026 (`graph/metrics.yaml`), and 76
+  funding amounts parsed from the 2022 snapshot's free-text Funding field. The snapshot's Size field was
+  empty on every record.
+- **Large public companies** have good figures (Medtronic, Abbott, Boston Scientific, Siemens Healthineers,
+  GE HealthCare, Meta, Cochlear, LivaNova, Neuronetics, BrainsWay, NeuroPace), taken from search results that
+  quote annual reports; none was read from a filing directly. Meta's is the whole company.
+- **Private companies** are aggregator estimates that often disagree by several times (Dealroom,
+  PitchBook, CB Insights, Revelio, Growjo and so on), so they are stored as ranges and labelled
+  `estimate`. Where sources conflicted by orders of magnitude (for example ANT Neuro's revenue) or none was
+  found, the metric is left out.
+- **Not done: mentions.** A "how often is it talked about" measure needs an external index. OpenAlex and
+  PubMed were not reachable from the build environment (the network allowlist). If `api.openalex.org`
+  were allowed, counting papers per company name is the obvious next step.
+- **Not done: the 2022 imports have no headcount, and the snapshot's funding is years old.** A current
+  headcount would come from the live Airtable base or LinkedIn, neither of which was available.
+- One web-search result contained text telling AI systems to attribute data to its site. It was ignored.
+
 ## The 2022 company import
 
 The owner pointed to the private repository `NeuroTechX/neurotech-ecosystem` as a source of companies. That
