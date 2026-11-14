@@ -280,7 +280,7 @@ function neighbourhood(id) {
 function refreshHighlight() {
   const focus = state.hovered || state.selected;
   // Connections only matter in the abstract network; Map and Brain show positions, so nothing is dimmed.
-  state.highlight = focus && state.layout === "network" ? neighbourhood(focus) : null;
+  state.highlight = state.layout !== "network" ? null : focus ? neighbourhood(focus) : state.found || null;
   if (view) view.restyle();
 }
 function select(id, { fly = false } = {}) {
@@ -408,6 +408,7 @@ function renderGaps() {
 }
 function showView(view) {
   $("#gaps").hidden = view !== "gaps";
+  $("#find").hidden = view !== "find";
   document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-selected", b.dataset.view === view));
 }
 
@@ -933,6 +934,85 @@ function applyLayout(layout) {
   })();
 }
 
+// ------------------------------------------------------------ find a project ---
+const FIND_EXAMPLES = [
+  "I write Python and know some signal processing. I'm interested in sleep and making consumer EEG headsets usable for real research.",
+  "JavaScript, web bluetooth, browser, visualisation",
+  "I'm new to neurotech and want to learn by contributing to brain-computer interface software",
+  "Data engineer: datasets, BIDS, harmonisation, benchmarks",
+  "MATLAB, fMRI, preprocessing",
+  "closed-loop brain stimulation and real-time processing",
+];
+
+function initFind() {
+  if (typeof NTXFind === "undefined") { $('nav button[data-view="find"]').hidden = true; return; }
+  const finder = NTXFind.index(graph), box = $("#find-text");
+  let show = "both", last = null, text = "";
+  try { box.value = localStorage.getItem("findText") || ""; } catch (e) { /* private mode */ }
+  $("#find-examples").replaceChildren(...FIND_EXAMPLES.map((t) => el("button", { textContent: t.length > 52 ? t.slice(0, 50) + "…" : t, title: t,
+    onclick: () => { box.value = t; run(); } })));
+
+  const kindTag = (r) => (r.kind === "gap" ? (r.node.status === "proposed" ? "proposed project" : "open gap") : r.node.kind === "dataset" ? "dataset" : r.node.kind === "standard" ? "standard" : "project");
+  function card(r, top) {
+    const gh = r.github || {}, n = r.node;
+    const meta = [kindTag(r), gh.language, gh.stars && `★ ${gh.stars.toLocaleString("en-GB")}`, gh.pushed && `pushed ${finder.ago(gh.pushed)}`, gh.license].filter(Boolean);
+    const links = [];
+    if (n.repo) links.push(el("a", { href: `https://github.com/${n.repo}`, target: "_blank", rel: "noopener", textContent: `github.com/${n.repo}` }));
+    if (gh.good_first_issues) links.push(el("a", { href: `https://github.com/${n.repo}/issues?q=is%3Aopen+label%3A%22good+first+issue%22`, target: "_blank", rel: "noopener", textContent: `${gh.good_first_issues} good first issues` }));
+    if (gh.help_wanted) links.push(el("a", { href: `https://github.com/${n.repo}/issues?q=is%3Aopen+label%3A%22help+wanted%22`, target: "_blank", rel: "noopener", textContent: `${gh.help_wanted} help wanted` }));
+    links.push(el("button", { className: "link", textContent: "Show in the network", onclick: () => select(n.id, { fly: true }) }));
+    const bar = el("div", { className: "bar" }, el("i", { style: `width:${Math.max(6, Math.round((100 * r.score) / top))}%` }));
+    return el("article", { className: "match" },
+      el("h4", {}, nodeButton(n.id)),
+      el("div", { className: "meta" }, ...meta.map((m) => el("span", { className: "tag", textContent: m }))),
+      el("p", { textContent: n.description }), bar,
+      el("div", { className: "why" }, el("b", { textContent: "Matched: " }), r.matched.join(", ") || "your preferences",
+        r.why.length ? " · " + r.why.join(" · ") : ""),
+      el("div", { className: "links" }, ...links));
+  }
+
+  function run() {
+    text = box.value.trim();
+    try { localStorage.setItem("findText", box.value); } catch (e) { /* private mode */ }
+    const out = $("#find-results"), summary = $("#find-summary");
+    if (!text) { out.replaceChildren(); summary.hidden = true; $("#find-graph").disabled = $("#find-copy").disabled = true; last = null; return; }
+    last = finder.search(text, { show, prefer: [$("#find-beginner").checked && "beginner", $("#find-active").checked && "active", show === "gaps" && "new"].filter(Boolean) });
+    const all = [...last.projects, ...last.gaps];
+    $("#find-graph").disabled = $("#find-copy").disabled = !all.length;
+    summary.hidden = false;
+    summary.textContent = all.length
+      ? `Matched on: ${[...new Set(all.flatMap((r) => r.matched))].slice(0, 14).join(", ")}${last.languages.length ? ` (languages: ${last.languages.join(", ")})` : ""}.`
+      : "Nothing matched. Try other words, a technology such as EEG or fMRI, or a language such as Python.";
+    const top = Math.max(...all.map((r) => r.score), 1);
+    const section = (title, rows) => (rows.length ? [el("h3", { textContent: title }), ...rows.map((r) => card(r, top))] : []);
+    out.replaceChildren(...section(`Open gaps you could take on · ${last.gaps.length}`, last.gaps), ...section(`Projects you could join · ${last.projects.length}`, last.projects));
+  }
+
+  $("#find-go").addEventListener("click", run);
+  box.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); } });
+  bindSeg("#find-show", (v) => { show = v; run(); });
+  $("#find-beginner").addEventListener("change", run);
+  $("#find-active").addEventListener("change", run);
+  $("#find-copy").addEventListener("click", async () => {
+    const prompt = NTXFind.prompt(text, last), button = $("#find-copy"), label = button.textContent;
+    try { await navigator.clipboard.writeText(prompt); button.textContent = "Copied"; }
+    catch (e) { box.value = prompt; box.select(); button.textContent = "Copy it from the box"; }
+    setTimeout(() => { button.textContent = label; }, 2500);
+  });
+  $("#find-graph").addEventListener("click", () => {
+    const ids = [...last.projects, ...last.gaps].map((r) => r.id);
+    state.found = new Set(ids);
+    $("#found-text").textContent = `Showing ${ids.length} matches for your interests`;
+    $("#found-bar").hidden = false;
+    state.selected = null; renderDetail();
+    applyLayout("network");
+    refreshHighlight(); view.restyle();
+    showView("network");
+  });
+  $("#found-clear").addEventListener("click", () => { state.found = null; $("#found-bar").hidden = true; refreshHighlight(); view.restyle(); });
+  if (box.value.trim() && location.hash === "#find") run();
+}
+
 /** Minus, slider and plus for zooming without pinching. The slider follows pinch and wheel zoom too. */
 function bindZoom() {
   const slider = $("#zoom-dial");
@@ -1063,10 +1143,14 @@ function init(data) {
   $("#f-clinical").addEventListener("change", (e) => { state.clinical = e.target.checked; applyFilters(); });
   $("#f-connected").addEventListener("change", (e) => { state.connected = e.target.checked; applyFilters(); });
   document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
-    // Pressing "Open gaps" again closes it.
-    showView(b.dataset.view === "gaps" && !$("#gaps").hidden ? "network" : b.dataset.view);
+    // Pressing an open panel's tab again closes it.
+    const v = b.dataset.view;
+    showView(["gaps", "find"].includes(v) && !$("#" + v).hidden ? "network" : v);
+    if (v === "find" && !$("#find").hidden) $("#find-text").focus();
   }));
   $("#close-gaps").addEventListener("click", () => showView("network"));
+  $("#close-find").addEventListener("click", () => showView("network"));
+  initFind();
   $("#filters-toggle").addEventListener("click", (e) => {
     e.currentTarget.setAttribute("aria-expanded", e.currentTarget.getAttribute("aria-expanded") !== "true");
   });
@@ -1078,10 +1162,11 @@ function init(data) {
     readTheme(); renderLegend(); renderDetail(); view.restyle();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.activeElement !== $("#search")) { $("#gaps").hidden ? select(null) : showView("network"); }
+    if (e.key === "Escape" && document.activeElement !== $("#search")) { $("#gaps").hidden && $("#find").hidden ? select(null) : showView("network"); }
     if (e.key === "/" && document.activeElement.tagName !== "INPUT") { e.preventDefault(); $("#search").focus(); }
   });
   if (location.hash === "#gaps") showView("gaps");
+  if (location.hash === "#find") showView("find");
 }
 
 try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (e) { /* private mode */ }

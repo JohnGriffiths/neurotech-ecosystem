@@ -74,6 +74,26 @@ switch to MNI coordinate space and place them where in the brain they are typica
   imported companies with no city sit at the centre of their country; tfus (focused ultrasound) has no
   device, so nothing is shown for it in the Brain layout.
 
+## Use case: finding a project to work on
+
+Added at the owner's request: a **Find** tab where a person types a paragraph or a list of keywords about
+their interests and skills.
+
+- **Matching** is plain text relevance in the browser, with no server or model: words are stemmed, a table of
+  concepts expands them (brainwaves means EEG, real time means streaming), and candidates are the existing
+  projects plus the open gaps. Each result shows the words that matched and why it ranked: language, recent
+  activity, good-first-issue and help-wanted counts, how many parties want the gap, what it builds on.
+- **Controls:** show projects, gaps or both; prefer beginner friendly; prefer actively maintained.
+- **Outputs:** result cards, "Show matches on the network" (highlights them in the graph), and "Copy as a
+  prompt", which assembles the person's text and the shortlist for an AI assistant to advise on.
+- **GitHub facts** come from `tools/fetch_github.py` into `graph/github.json` (language, topics, stars, last
+  push, open issues, licence, counts of "good first issue" and "help wanted"). Re-run it to refresh. Label
+  names vary by project (MNE-Python reports no good-first-issue label although it welcomes newcomers), so
+  those counts understate how approachable some projects are.
+- **Limits:** it matches words, not meaning, so unusual phrasing can miss; there is no model of skills,
+  time available or career goals; gaps and their wanted-by edges are unverified seed data; only 52 repos
+  and 22 gaps are candidates, so the pool is small until the graph grows.
+
 ## Size metrics (employees, funding, revenue)
 
 Requested by the owner: a relative size for companies, both as an ordinal scale and as actual numbers.

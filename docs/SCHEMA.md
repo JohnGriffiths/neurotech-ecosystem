@@ -33,6 +33,12 @@ Notes:
 - `python tools/ntgraph.py check-repos` confirms that every `repo` is reachable on GitHub.
 - A `proposed` project is one that should exist but does not. It appears on the gaps board.
 
+## GitHub facts
+
+Each project with a `repo` exports a `github` object (language, topics, stars, last push, open issues,
+licence, archived, and counts of "good first issue" and "help wanted" issues) from `graph/github.json`,
+which `tools/fetch_github.py` generates. It feeds the Find tab and is not hand-edited.
+
 ## Size metrics
 
 Organisations can carry `metrics`: `employees`, `funding` (total raised) and `revenue`. Most have none, and

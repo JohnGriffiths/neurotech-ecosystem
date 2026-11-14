@@ -22,6 +22,7 @@
   </div>
   <nav role="tablist" aria-label="View">
     <button role="tab" aria-selected="true" data-view="network">Network</button>
+    <button role="tab" aria-selected="false" data-view="find">Find</button>
     <button role="tab" aria-selected="false" data-view="gaps">Open gaps <span class="count" id="gap-count"></span></button>
   </nav>
   <button class="icon" id="theme" title="Switch theme" aria-label="Switch between light and dark theme"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.8a6.2 6.2 0 010 12.4z" fill="currentColor"/></svg></button>
@@ -117,6 +118,37 @@
   <span class="hint">Drag to rotate · scroll to zoom · right-drag to pan</span>
 </div>
 
+<main class="glass" id="find" hidden>
+  <button class="icon close-gaps" id="close-find" title="Close (Esc)" aria-label="Close find a project">✕</button>
+  <div class="gaps-inner">
+    <h2>Find a project</h2>
+    <p class="lead">Say what you are interested in and what you can do, as a short paragraph or a list of keywords. You get
+      existing projects you could join and open gaps nobody has filled yet, each with the reason it matched. This runs in your
+      browser; nothing you type is sent anywhere.</p>
+    <label class="visually-hidden" for="find-text">What are you interested in?</label>
+    <textarea id="find-text" rows="4" placeholder="For example: I write Python and know some signal processing. I'm interested in sleep and in making consumer EEG headsets usable for real research."></textarea>
+    <div class="find-examples" id="find-examples"></div>
+    <div class="find-controls">
+      <div class="seg" id="find-show" role="radiogroup" aria-label="What to show">
+        <button role="radio" aria-checked="true" data-v="both">Both</button>
+        <button role="radio" aria-checked="false" data-v="projects">Projects to join</button>
+        <button role="radio" aria-checked="false" data-v="gaps">Gaps to take on</button>
+      </div>
+      <label class="check"><input type="checkbox" id="find-beginner"> Beginner friendly</label>
+      <label class="check"><input type="checkbox" id="find-active"> Actively maintained</label>
+    </div>
+    <div class="find-actions">
+      <button class="primary" id="find-go">Find</button>
+      <button id="find-graph" disabled>Show matches on the network</button>
+      <button id="find-copy" disabled title="Copies your text and this shortlist, ready to paste into an AI assistant for advice">Copy as a prompt</button>
+    </div>
+    <p class="lead" id="find-summary" hidden></p>
+    <div id="find-results"></div>
+  </div>
+</main>
+
+<div class="glass" id="found-bar" hidden><span id="found-text"></span><button id="found-clear">Clear</button></div>
+
 <main class="glass" id="gaps" hidden>
   <button class="icon close-gaps" id="close-gaps" title="Close (Esc)" aria-label="Close open gaps">✕</button>
   <div class="gaps-inner">
@@ -130,6 +162,7 @@
 
 <script src="vendor/force-graph.min.js"></script>
 <script src="vendor/graph3d.min.js"></script>
+<script src="find.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
