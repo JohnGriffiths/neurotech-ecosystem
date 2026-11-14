@@ -49,7 +49,7 @@ const LINK_DISTANCE = { USES: 90, AFFILIATED_WITH: 30, MAINTAINS: 38 };
 
 const state = {
   lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: true,
-  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network",
+  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network", labels: false,
 };
 const ref = {}; // reference geometry loaded on demand: ref.world (map outlines), ref.brain (template surface)
 const GLOBE_R = 230, MAP_K = 2.2;                       // globe radius; degrees-to-units scale of the flat map
@@ -148,7 +148,7 @@ function drawNode(n, ctx, scale) {
     ctx.lineWidth = 1.5 / scale; ctx.strokeStyle = C.text; ctx.stroke();
   }
   // Labels: hubs first, more as you zoom in; always for the lit neighbourhood.
-  const always = focus || (state.highlight && lit) || n.type === "modality" || n.hub || state.layout === "brain";
+  const always = focus || (state.highlight && lit) || n.type === "modality" || n.hub || state.layout === "brain" || state.labels;
   if (lit && (always || n.r * scale > 8.5)) {
     const size = (focus ? 13 : 11) / scale;
     ctx.font = `${focus || n.type === "modality" ? 600 : 400} ${size}px ui-sans-serif, system-ui, sans-serif`;
@@ -633,7 +633,7 @@ function make3d(container) {
       o.sites.lineMat.color.set(colors[0]); o.sites.dotMat.color.set(colors[0]);
     }
     const strong = focus || n.type === "modality";
-    const wanted = lit && (strong || !!state.highlight || n.hub || state.layout === "brain");
+    const wanted = lit && (strong || !!state.highlight || n.hub || state.layout === "brain" || state.labels);
     if (wanted && !o.label) {
       o.label = new SpriteText(n.name, 4);
       Object.assign(o.label, { fontFace: "ui-sans-serif, system-ui, sans-serif", strokeWidth: 1.5, padding: 1 });
@@ -889,6 +889,11 @@ function initGraph() {
   window.addEventListener("resize", () => view.resize());
   $("#fit").addEventListener("click", () => view.fit(600));
   $("#rotate").addEventListener("click", () => setRotate(!state.rotate));
+  $("#labels").addEventListener("click", () => {
+    state.labels = !state.labels;
+    $("#labels").setAttribute("aria-pressed", String(state.labels));
+    view.restyle();
+  });
   // Taking hold of the graph stops the idle spin.
   $("#graph").addEventListener("pointerdown", () => { state.touched = true; if (state.rotate) setRotate(false); });
   $("#graph").addEventListener("wheel", () => { state.touched = true; }, { passive: true });
