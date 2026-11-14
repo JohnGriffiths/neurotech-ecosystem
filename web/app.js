@@ -51,6 +51,7 @@ const state = {
   lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: true,
   selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network", labels: false, sizeBy: "auto", sizeScale: "tier",
 };
+const cacheBust = () => (window.NTX_BUILD ? `?v=${window.NTX_BUILD}` : "");  // set by the build; defeats stale caches
 const ref = {}; // reference geometry loaded on demand: ref.world (map outlines), ref.brain (template surface)
 const GLOBE_R = 230, MAP_K = 2.2;                       // globe radius; degrees-to-units scale of the flat map
 const BRAIN_CENTRE = [0, 15, 18];                        // middle of the brain in scene units (MNI 0,-18,15)
@@ -899,8 +900,8 @@ function make3d(container) {
 async function setLayout(layout) {
   const note = $("#layout-note");
   try {
-    if (layout === "map" && !ref.world) ref.world = await (await fetch("world.json")).json();
-    if (layout === "brain" && !ref.brain) ref.brain = await (await fetch("brain.json")).json();
+    if (layout === "map" && !ref.world) ref.world = await (await fetch("world.json" + cacheBust())).json();
+    if (layout === "brain" && !ref.brain) ref.brain = await (await fetch("brain.json" + cacheBust())).json();
   } catch (err) {
     console.error(err);
     note.textContent = "Could not load the reference data for that layout.";
@@ -1084,7 +1085,7 @@ function init(data) {
 }
 
 try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (e) { /* private mode */ }
-fetch("graph.json").then((r) => r.json()).then(init).catch((err) => {
+fetch("graph.json" + cacheBust()).then((r) => r.json()).then(init).catch((err) => {
   console.error(err);
   $("#graph").textContent = "Could not load graph.json. Run: python tools/ntgraph.py build";
 });

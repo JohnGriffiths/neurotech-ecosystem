@@ -546,6 +546,26 @@ def check_repos(nodes: list[dict]) -> list[str]:
     return missing
 
 
+def stamp_assets(out: Path) -> None:
+    """Version the viewer's files so a browser never pairs a new page with an old cached script.
+
+    GitHub Pages lets browsers cache files for minutes, so after a deploy a visitor could get the new
+    index.html with the previous app.js. Each local script, stylesheet and data fetch gets ?v=<hash of its
+    contents>, and the page exposes the combined hash as window.NTX_BUILD for the data fetches.
+    """
+    import hashlib
+    page = (out / "index.html").read_text()
+    def digest(rel: str) -> str:
+        return hashlib.sha1((out / rel).read_bytes()).hexdigest()[:8]
+    def stamp(match: re.Match) -> str:
+        attr, rel, quote = match.group(1), match.group(2), match.group(3)
+        return f'{attr}="{rel}?v={digest(rel)}{quote}' if (out / rel).is_file() else match.group(0)
+    page = re.sub(r'((?:src|href))="((?!https?:|#|data:)[^"?]+\.(?:js|css|png|ico))(")', stamp, page)
+    build = hashlib.sha1("".join(digest(f) for f in ("app.js", "style.css", "graph.json")).encode()).hexdigest()[:8]
+    page = page.replace("</head>", f'<script>window.NTX_BUILD="{build}"</script>\n</head>', 1)
+    (out / "index.html").write_text(page)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -602,6 +622,7 @@ def main(argv: list[str] | None = None) -> int:
         out = args.out if args.out.is_absolute() else ROOT / args.out
         out.mkdir(parents=True, exist_ok=True)
         shutil.copytree(WEB_DIR, out, dirs_exist_ok=True)
+        stamp_assets(out)
         (out / "graph.json").write_text(json.dumps(export(nodes, edges), indent=1))
         print(f"built {out}/ ({len(nodes)} nodes, {len(edges)} edges)")
     return 0
