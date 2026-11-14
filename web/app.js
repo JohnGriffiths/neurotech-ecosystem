@@ -120,14 +120,18 @@ function glyph(shape, color, hollow) {
 function isHollow(n) { return n.status === "proposed" || n.kind === "capability"; }
 function isLit(n) { return !state.highlight || state.highlight.has(n.id); }
 
+/** Pins in the Map and Brain layouts shrink as you zoom in, so they stay points and the geography shows through. */
+function pinScale2d(scale) { return Math.max(0.1, Math.min(1, 1.2 * Math.pow(scale, -1.3))); }
+
 function drawNode(n, ctx, scale) {
+  const r = state.layout === "network" ? n.r : n.r * pinScale2d(scale);
   const { shape } = TYPES[n.type];
   const colors = nodeColors(n);
   const lit = isLit(n);
   const focus = n.id === state.selected || n.id === state.hovered;
   ctx.save();
   ctx.globalAlpha = lit ? 1 : 0.1;
-  shapePath(ctx, shape, n.x, n.y, n.r);
+  shapePath(ctx, shape, n.x, n.y, r);
   if (isHollow(n)) {
     ctx.fillStyle = C.bg; ctx.fill();
     ctx.lineWidth = 1.4; ctx.strokeStyle = colors[0];
@@ -139,21 +143,21 @@ function drawNode(n, ctx, scale) {
     ctx.shadowBlur = 0;
     if (colors[1]) { // spans both values: paint the right half in the second colour
       ctx.save(); ctx.clip();
-      ctx.fillStyle = colors[1]; ctx.fillRect(n.x, n.y - n.r * 2, n.r * 2, n.r * 4);
+      ctx.fillStyle = colors[1]; ctx.fillRect(n.x, n.y - r * 2, r * 2, r * 4);
       ctx.restore();
     }
   }
   if (focus) {
-    shapePath(ctx, shape, n.x, n.y, n.r + 2.2 / scale + 1);
+    shapePath(ctx, shape, n.x, n.y, r + 2.2 / scale + 1);
     ctx.lineWidth = 1.5 / scale; ctx.strokeStyle = C.text; ctx.stroke();
   }
   // Labels: hubs first, more as you zoom in; always for the lit neighbourhood.
   const always = focus || (state.highlight && lit) || n.type === "modality" || n.hub || state.layout === "brain" || state.labels;
-  if (lit && (always || n.r * scale > 8.5)) {
+  if (lit && (always || r * scale > 8.5)) {
     const size = (focus ? 13 : 11) / scale;
     ctx.font = `${focus || n.type === "modality" ? 600 : 400} ${size}px ui-sans-serif, system-ui, sans-serif`;
     ctx.textAlign = "center"; ctx.textBaseline = "top";
-    const y = n.y + n.r * 1.25 + 2 / scale;
+    const y = n.y + r * 1.25 + 2 / scale;
     ctx.lineWidth = 3 / scale; ctx.lineJoin = "round"; ctx.strokeStyle = C.bg;
     ctx.strokeText(n.name, n.x, y);
     ctx.fillStyle = focus || n.type === "modality" ? C.text : C["text-2"];
@@ -420,7 +424,7 @@ function layoutPosition(n, three) {
 /** Pin nodes to their place in the Map or Brain layout, fanning out those that share one spot. */
 function pinNodes() {
   const three = state.mode === "3d";
-  graph.nodes.forEach((n) => { delete n.fx; delete n.fy; delete n.fz; n.r = state.layout === "network" ? n.r0 : state.layout === "map" ? 2.4 : 3.4; });
+  graph.nodes.forEach((n) => { delete n.fx; delete n.fy; delete n.fz; n.r = state.layout === "network" ? n.r0 : state.layout === "map" ? 1.7 : 3.4; });
   if (state.layout === "network") return;
   const groups = new Map();
   graph.nodes.forEach((n) => {
@@ -535,7 +539,7 @@ function make2d(container) {
     .backgroundColor("rgba(0,0,0,0)")
     .nodeVal((n) => n.r * n.r)
     .nodeCanvasObject(drawNode)
-    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, n.r + 3, 0, 2 * Math.PI); ctx.fill(); })
+    .nodePointerAreaPaint((n, color, ctx, scale) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, (state.layout === "network" ? n.r : n.r * pinScale2d(scale)) + 3 / scale, 0, 2 * Math.PI); ctx.fill(); })
     .linkWidth((l) => (linkLit(l) ? 1.6 : l.type === "REALLY_WANTS" ? 1.1 : 0.6))
     .linkLineDash((l) => (l.type === "REALLY_WANTS" ? [3, 2.5] : null))
     .linkDirectionalArrowLength((l) => (linkLit(l) ? 4.5 : l.type === "USES" ? 0 : 2.2))
@@ -622,7 +626,7 @@ function make3d(container) {
     const colors = nodeColors(n), lit = isLit(n);
     const focus = n.id === state.selected || n.id === state.hovered;
     const m = o.mesh.material, r = n.r * 0.85;
-    o.mesh.scale.setScalar(r);
+    if (state.layout === "network") o.mesh.scale.setScalar(r);
     const map = colors[1] && !o.hollow ? striped(colors[0], colors[1]) : null;
     if (map !== o.map) { m.map = map; o.map = map; m.needsUpdate = true; }
     m.color.set(map ? "#ffffff" : colors[0]);
@@ -733,6 +737,14 @@ function make3d(container) {
     fog.near = Math.max(1, d - radius); fog.far = d + radius * 3.5;
     for (const n of fg.graphData().nodes) {
       const o = n.__o;
+      if (o && state.layout !== "network" && Number.isFinite(n.x)) {
+        // Zooming in shrinks pins towards points; at the default framing they are full size.
+        let pin = Math.max(0.12, Math.min(1, Math.hypot(cam.x - n.x, cam.y - n.y, cam.z - n.z) / (state.layout === "map" ? 560 : 420)));
+        if (n.id === state.selected || n.id === state.hovered) pin = Math.max(pin, 0.6);  // keep the one you are looking at visible
+        o.mesh.scale.setScalar(n.r * 0.85 * pin);
+        o.gap = n.r * 0.85 * pin * 1.35;
+        if (o.sites) o.sites.group.scale.setScalar(1);
+      }
       if (!o || !o.label || !o.label.visible || !Number.isFinite(n.x)) continue;
       const k = Math.min(6, Math.max(1, Math.hypot(cam.x - n.x, cam.y - n.y, cam.z - n.z) / 420));
       o.holder.scale.setScalar(k);
