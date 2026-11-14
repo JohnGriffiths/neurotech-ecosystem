@@ -1200,6 +1200,8 @@ function init(data) {
   window.NTX = {
     degree: (id) => (adjacency[id] || new Set()).size,
     has: (id) => !!byId[id],
+    name: (id) => (byId[id] ? byId[id].name : id),
+    selected: () => state.selected,
     select: (id) => (id ? select(id, { fly: true }) : select(null)),
     /** Put the viewer back in its starting state. */
     reset() {

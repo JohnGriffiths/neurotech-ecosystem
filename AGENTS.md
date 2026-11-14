@@ -81,7 +81,9 @@ node tools/make_world_data.js         # regenerate web/world.json (needs world-a
   `view.setLayout()` builds the 3D globe or brain backdrop, and the 2D renderer draws its own in
   `drawBackdrop2d`. Reference data loads on demand (`ref.world`, `ref.brain`).
 - Guided demos: `web/demos.js` holds declarative demo scripts (`DEMOS`). Each step names the state the viewer
-  should be in and the runner clicks the real controls to get there, so steps are independent and Back works.
+  should be in. In "Watch" mode the runner clicks the real controls to get there; in "Try it myself" mode it
+  derives a checklist from what differs from the previous step and ticks items as the person does them. Steps
+  are independent, so Back works.
   Add a demo by appending to `DEMOS`; `tests/demos_check.js` checks every step against the graph. Demos are
   also reachable at `#demo-<id>`. `app.js` exposes only a tiny `window.NTX` (degree, has, select, reset).
 - Find a project: `web/find.js` is a standalone matcher (`NTXFind.index(graph).search(text, opts)`) that runs in

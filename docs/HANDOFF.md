@@ -77,8 +77,11 @@ switch to MNI coordinate space and place them where in the brain they are typica
 ## Guided demos
 
 A play button in the header opens five click-through demos: the big picture, who is where and how big (map
-and size), devices in the brain, finding a project, and from a gap to a project. Each step shows a caption
-card with Back and Next while the page performs the actions by clicking the real controls. They are meant
+and size), devices in the brain, finding a project, and from a gap to a project. Two modes, chosen in the
+menu and remembered: **Try it myself** (the default), where each step lists what to do, ticks the items as the
+person does them with the real controls, points at the control with a pulse and offers "Show me"; and **Watch**,
+where the page clicks the controls itself. On a phone the filters sheet opens automatically when a step
+refers to a control inside it. They are meant
 for introducing the tool to students, volunteers and maintainers, and `#demo-map` style links start one
 directly. They are scripted in `web/demos.js`; a test checks that every item they mention still exists.
 The demos describe the current seed data honestly, including that the wants behind the gaps are unverified.
