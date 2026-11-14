@@ -271,6 +271,23 @@ function renderLegend() {
       el("li", { className: "static" }, both, "Both"),
       el("li", { className: "static" }, glyph("circle", C.neutral), "Not applicable"));
   }
+  renderKey();
+}
+
+/** A small key that stays on screen and follows the chosen colouring. */
+function renderKey() {
+  const list = $("#key-list");
+  if (!list) return;
+  const item = (g, label) => el("li", {}, g, label);
+  if (state.lens === "type") {
+    list.replaceChildren(...Object.entries(TYPES).map(([, m]) => item(glyph(m.shape, C[m.color]), m.label)),
+      item(glyph("circle", C.teal, true), "Proposed"));
+  } else {
+    const lens = LENSES[state.lens];
+    const both = el("span", { className: "glyph" });
+    both.innerHTML = `<svg viewBox="0 0 14 14" width="14" height="14" aria-hidden="true"><path d="M7 1.5a5.5 5.5 0 000 11z" fill="${C[lens.values[0][2]]}"/><path d="M7 1.5a5.5 5.5 0 010 11z" fill="${C[lens.values[1][2]]}"/></svg>`;
+    list.replaceChildren(...lens.values.map(([, label, c]) => item(glyph("circle", C[c]), label)), item(both, "Both"), item(glyph("circle", C.neutral), "n/a"));
+  }
 }
 
 // --------------------------------------------------------------- selection ---
@@ -1098,6 +1115,17 @@ function initGraph() {
   $("#fit").addEventListener("click", () => view.fit(600));
   $("#rotate").addEventListener("click", () => setRotate(!state.rotate));
   bindZoom();
+  let keyOpen = true;
+  keyOpen = window.innerWidth >= 820;    // collapsed by default on a phone, where space is tight
+  try { const saved = localStorage.getItem("keyOpen"); if (saved) keyOpen = saved === "1"; } catch (e) { /* private mode */ }
+  const setKey = (open) => {
+    keyOpen = open;
+    $("#key").classList.toggle("collapsed", !open);
+    $("#key-toggle").setAttribute("aria-expanded", String(open));
+    try { localStorage.setItem("keyOpen", open ? "1" : "0"); } catch (e) { /* private mode */ }
+  };
+  setKey(keyOpen);
+  $("#key-toggle").addEventListener("click", () => setKey(!keyOpen));
   $("#labels").addEventListener("click", () => {
     state.labels = !state.labels;
     $("#labels").setAttribute("aria-pressed", String(state.labels));
