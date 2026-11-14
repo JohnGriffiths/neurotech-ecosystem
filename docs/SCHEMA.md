@@ -7,13 +7,16 @@ Seven node types, nine edge types. The machine-checked version is `NODE_KINDS` a
 
 Files in `graph/nodes/*.yaml`. Each file has an optional `defaults` mapping applied to every entry.
 Every node has `id` (unique, `lowercase-kebab-case`, never renamed once merged), `type`, `name` and
-`description`. `url` and `tags` are optional everywhere.
+`description`. `url` and `tags` are optional everywhere, as are two provenance fields: `source` (where the
+record came from, e.g. `ntx-ecosystem-2022`) and `checked` (when someone last confirmed it against a live
+source, as `YYYY`, `YYYY-MM` or `YYYY-MM-DD`). `python tools/ntgraph.py stale` lists organisations, devices
+and projects whose `checked` date is missing or older than this year.
 
 | Type | What it is | Extra fields |
 |---|---|---|
 | `project` | **The main entity.** Almost always a GitHub repository. | `repo: owner/name`; `kind`: `software`, `hardware`, `dataset`, `standard`, `resource`; `layer`; `status`: `exists` (default) or `proposed`; `modalities` |
 | `device` | A hardware product. | `modalities` |
-| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator`; `modalities` |
+| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator`; `modalities`; `country`; `status`: `active`, `acquired`, `defunct`, `unknown` |
 | `person` | Someone with a public role on a project or organisation. | `github` (optional handle) |
 | `modality` | A technology: EEG, MEG, fMRI, DBS, TMS… | `class`: `sensing`, `modulating` or `[sensing, modulating]`; `invasiveness`: `invasive` or `noninvasive` |
 | `indication` | A condition that clinical neurotechnology diagnoses or treats. | |

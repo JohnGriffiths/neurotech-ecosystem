@@ -12,6 +12,7 @@ humans in docs/SCHEMA.md. Keep the two in step.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -40,6 +41,7 @@ NODE_KINDS = {
 }
 LAYERS = {"acquisition", "streaming", "processing", "modelling", "ml", "experiment", "data", "standard", "hardware", "community"}
 PROJECT_STATUS = {"exists", "proposed"}
+ORG_STATUS = {"active", "acquired", "defunct", "unknown"}
 CLASSES = {"sensing", "modulating"}
 INVASIVENESS = {"invasive", "noninvasive"}
 
@@ -60,12 +62,15 @@ COVERAGE = {"partial", "full"}
 STAGES = {"approved", "investigational"}
 
 NODE_FIELDS = {"id", "type", "kind", "name", "url", "description", "tags",
+               "source", "checked",                         # provenance: where a record came from, when last confirmed
+               "country",                                   # org
                "repo", "layer", "status", "modalities",   # project (modalities also on device, org)
                "github",                                    # person
                "class", "invasiveness"}                     # modality
 EDGE_FIELDS = {"from", "to", "type", "status", "evidence", "verified_by", "note", "coverage", "stage", "endorsed_by"}
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 REPO_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+CHECKED_RE = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?$")  # YYYY, YYYY-MM or YYYY-MM-DD
 
 
 # --------------------------------------------------------------- loading ---
@@ -126,12 +131,20 @@ def load(graph_dir: Path = GRAPH_DIR) -> tuple[list[dict], list[dict], list[str]
             if not isinstance(n.get(field), str) or not n[field].strip():
                 errors.append(f"{src}: missing {field}")
 
-        allowed = {"project": {"repo", "layer", "status", "modalities"}, "device": {"modalities"}, "org": {"modalities"},
+        allowed = {"project": {"repo", "layer", "status", "modalities"}, "device": {"modalities"}, "org": {"modalities", "status", "country"},
                    "person": {"github"}, "modality": {"class", "invasiveness"}}.get(ntype, set())
-        for field in sorted({"repo", "layer", "status", "modalities", "github", "class", "invasiveness"} - allowed):
+        for field in sorted({"repo", "layer", "status", "modalities", "github", "class", "invasiveness", "country"} - allowed):
             if field in n:
                 errors.append(f"{src}: {field} does not apply to {ntype} nodes")
 
+        if "checked" in n:
+            n["checked"] = str(n["checked"])
+            if not CHECKED_RE.match(n["checked"]):
+                errors.append(f"{src}: checked must be YYYY, YYYY-MM or YYYY-MM-DD")
+        if "source" in n and not isinstance(n["source"], str):
+            errors.append(f"{src}: source must be a string")
+        if ntype == "org" and "status" in n and n["status"] not in ORG_STATUS:
+            errors.append(f"{src}: org status must be one of {sorted(ORG_STATUS)}")
         if ntype == "project":
             n.setdefault("status", "exists")
             if n["status"] not in PROJECT_STATUS:
@@ -221,8 +234,12 @@ def load(graph_dir: Path = GRAPH_DIR) -> tuple[list[dict], list[dict], list[str]
         if etype == "BLOCKS" and a.get("kind") == "capability":
             warnings.append(f"{src}: a capability blocking something is unusual; should {a['id']} be a bottleneck?")
 
-    for nid in sorted(set(by_id) - connected):
-        warnings.append(f"{by_id[nid]['_src']}: node {nid!r} has no edges")
+    isolated = sorted(set(by_id) - connected)
+    if len(isolated) > 10:
+        warnings.append(f"{len(isolated)} nodes have no edges (run `stale --isolated` to list them)")
+    else:
+        for nid in isolated:
+            warnings.append(f"{by_id[nid]['_src']}: node {nid!r} has no edges")
     return nodes, edges, errors, warnings
 
 
@@ -341,6 +358,20 @@ def bounties_markdown(nodes: list[dict], edges: list[dict]) -> str:
     return "\n".join(lines)
 
 
+def stale(nodes: list[dict], before: int) -> dict[str, list[dict]]:
+    """Orgs, devices and projects whose record was last confirmed before `before` (a year), or never.
+
+    Returned grouped by `source` ("" for hand-written records) so an update pass can be planned per source.
+    """
+    groups: dict[str, list[dict]] = {}
+    for n in nodes:
+        if n["type"] not in {"org", "device", "project"} or n.get("status") == "proposed":
+            continue
+        if int(n.get("checked", "0")[:4]) < before:
+            groups.setdefault(n.get("source", ""), []).append(n)
+    return groups
+
+
 def check_repos(nodes: list[dict]) -> list[str]:
     """Return the `repo` values that `git ls-remote` cannot reach (missing, renamed away or private)."""
     missing = []
@@ -360,6 +391,10 @@ def main(argv: list[str] | None = None) -> int:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("validate", help="check the graph against the schema")
     sub.add_parser("bounties", help="print the ranked bounty board as Markdown")
+    stale_p = sub.add_parser("stale", help="list organisations, devices and projects not confirmed recently")
+    stale_p.add_argument("--before", type=int, default=datetime.date.today().year, help="year; default this year")
+    stale_p.add_argument("--list", action="store_true", help="print every record, not just counts")
+    stale_p.add_argument("--isolated", action="store_true", help="list nodes with no edges instead")
     sub.add_parser("check-repos", help="confirm every project repo exists on GitHub (needs network)")
     build = sub.add_parser("build", help="write the static site")
     build.add_argument("--out", default="dist", type=Path)
@@ -377,6 +412,23 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "validate":
         verified = sum(e["status"] == "verified" for e in edges)
         print(f"ok: {len(nodes)} nodes, {len(edges)} edges ({verified} verified), {len(warnings)} warning(s)")
+    elif args.cmd == "stale":
+        if args.isolated:
+            linked = {e[k] for e in edges for k in ("from", "to")}
+            for n in nodes:
+                if n["id"] not in linked:
+                    print(f"{n['type']:10} {n['id']}")
+            return 0
+        groups = stale(nodes, args.before)
+        total = sum(len(v) for v in groups.values())
+        tracked = sum(1 for n in nodes if n["type"] in {"org", "device", "project"} and n.get("status") != "proposed")
+        print(f"{total} of {tracked} organisations, devices and projects not confirmed since {args.before}")
+        for source, items in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+            never = sum(1 for n in items if "checked" not in n)
+            print(f"  {source or '(hand-written)':28} {len(items):4}  ({never} never checked)")
+            if args.list:
+                for n in sorted(items, key=lambda n: n["id"]):
+                    print(f"      {n.get('checked', 'never'):10} {n['type']:8} {n['id']}  {n.get('url', '')}")
     elif args.cmd == "check-repos":
         missing = check_repos(nodes)
         for m in missing:
