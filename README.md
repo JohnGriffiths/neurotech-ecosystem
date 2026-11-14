@@ -36,6 +36,9 @@ python -m http.server -d dist      # http://localhost:8000
   take hold of it. Switch to a flat 2D layout with the toggle at the bottom; 2D is also the fallback where
   WebGL is unavailable.
 - Click a node for its details, repository link and connections. Hover to light up its neighbourhood.
+- **Layout:** switch from the network to a **Map**, where organisations are pinned to their headquarters
+  (a globe in 3D, a flat map in 2D), or to a **Brain**, where devices sit at the place in the brain where
+  they typically sample or act, in MNI space, with the template brain around them.
 - Colour the network by entity type, by sensing versus modulating, or by invasiveness.
 - Filter by entity type, class, invasiveness, a single technology, or clinical only.
 - Press `/` to search. Link straight to a node with `#node-id`, or to the gaps board with `#gaps`.
@@ -73,6 +76,17 @@ For the hand-written part:
 That includes who maintains what, people's affiliations, clinical indications and their regulatory stage,
 and above all the `REALLY_WANTS` edges, which are hypotheses that have not been confirmed with the party
 named. Verifying them, and correcting what is wrong, is the job of the first cartography sprint.
+
+## Data and credits
+
+- Organisation locations are resolved with [GeoNames](https://www.geonames.org) data, CC BY 4.0, through the
+  `geonamescache` package.
+- Coastlines and borders are [Natural Earth](https://www.naturalearthdata.com) (public domain) via
+  [world-atlas](https://github.com/topojson/world-atlas) (ISC).
+- The template brain comes from the MNI152 (ICBM 2009) template distributed with
+  [Nilearn](https://nilearn.github.io); electrode positions from the Colin27 montage in
+  [MNE-Python](https://mne.tools).
+- Logo, favicon and colour scheme belong to NeuroTechX.
 
 ## Picking this up
 

@@ -54,6 +54,26 @@ Specific items flagged to the owner as uncertain:
   favicon and fonts were taken from the 2017 state of `NeuroTechX/neurotechx.github.io`. The owner has not
   yet confirmed that this is the era he meant.
 
+## Map and Brain layouts
+
+Added at the owner's request: for organisations, flip to a map and pin them geographically; for devices,
+switch to MNI coordinate space and place them where in the brain they are typically used.
+
+- **Map:** 481 of 630 organisations are located. Hand-written ones use `graph/locations.yaml` (headquarters,
+  from memory); imported companies use their city and country from the 2022 snapshot. 27 places resolve only
+  to a country and are pinned at the centre of its cities, which the detail panel says. Organisations that
+  are distributed teams or communities have no location and do not appear.
+- **Brain:** 26 of 28 devices have `sites`. Electrode sites come from MNE's Colin27 montage taken as MNI and
+  projected onto the cortex; targets such as the subthalamic nucleus are in `graph/regions.yaml`. Typical
+  montages for user-placed devices (OpenBCI, Mentalab, PiEEG) are a common choice, not the only one. The Open
+  Ephys board and the Meta Neural Band (wrist) have no brain site. The cochlea, vagus nerve and spinal cord
+  are placed just outside the brain.
+- **Accuracy:** all coordinates are approximate (cities to the gazetteer, brain sites to roughly 5 to 10 mm)
+  and unverified. Electrode lists per device are from memory of the makers' documentation.
+- Not done: the map has no clustering or zoom-dependent labels, so dense cities are fanned out in a spiral;
+  imported companies with no city sit at the centre of their country; tfus (focused ultrasound) has no
+  device, so nothing is shown for it in the Brain layout.
+
 ## The 2022 company import
 
 The owner pointed to the private repository `NeuroTechX/neurotech-ecosystem` as a source of companies. That

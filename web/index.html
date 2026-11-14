@@ -31,6 +31,15 @@
   <button class="sheet-toggle" id="filters-toggle" aria-expanded="false">Filters and legend</button>
   <div class="sheet-body">
     <section>
+      <h2>Layout</h2>
+      <div class="seg" id="layout" role="radiogroup" aria-label="Layout">
+        <button role="radio" aria-checked="true" data-v="network">Network</button>
+        <button role="radio" aria-checked="false" data-v="map">Map</button>
+        <button role="radio" aria-checked="false" data-v="brain">Brain</button>
+      </div>
+      <p class="layout-note" id="layout-note" hidden></p>
+    </section>
+    <section>
       <h2>Colour by</h2>
       <div class="seg" id="lens" role="radiogroup" aria-label="Colour by">
         <button role="radio" aria-checked="true" data-v="type">Entity</button>

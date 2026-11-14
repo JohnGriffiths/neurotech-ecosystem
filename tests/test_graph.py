@@ -129,3 +129,30 @@ def test_provenance_fields_and_stale(tmp_path):
     groups = ntgraph.stale([n for n in loaded if n["id"] != "bad"], before=2026)
     assert [n["id"] for n in groups["import-x"]] == ["old"]
     assert [n["id"] for n in groups[""]] == ["never"]
+
+
+def test_device_sites_and_org_places(tmp_path):
+    nodes = [
+        {"id": "cap", "type": "device", "name": "Cap", "description": "d", "sites": ["Cz", "stn-left"]},
+        {"id": "bad", "type": "device", "name": "Bad", "description": "d", "sites": ["Nowhere"]},
+        {"id": "firm", "type": "org", "kind": "company", "name": "Firm", "description": "d", "city": "Montreal", "country": "Canada"},
+    ]
+    loaded, edges, errors, _ = write_graph(tmp_path, [], nodes)
+    assert any("unknown site 'Nowhere'" in e for e in errors)
+    # The real reference data resolves the same names.
+    real, real_edges, real_errors, _ = ntgraph.load()
+    assert real_errors == []
+    exported = {n["id"]: n for n in ntgraph.export(real, real_edges)["nodes"]}
+    percept = exported["medtronic-percept"]["brain"]
+    assert [s["id"] for s in percept] == ["stn-left", "stn-right"] and percept[0]["mni"][0] < 0 < percept[1]["mni"][0]
+    muse = exported["muse-headband"]["brain"]
+    assert muse[0]["kind"] == "electrode" and len(muse) == 4
+    assert exported["interaxon"]["geo"]["precision"] == "city"
+    assert "geo" not in exported["mne-python"] and "brain" not in exported["mne-python"]
+
+
+def test_locations_file_applies_to_orgs():
+    nodes, _, errors, _ = ntgraph.load()
+    assert errors == []
+    by_id = {n["id"]: n for n in nodes}
+    assert (by_id["interaxon"]["city"], by_id["interaxon"]["country"]) == ("Toronto", "Canada")

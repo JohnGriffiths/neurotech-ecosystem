@@ -1,65 +1,68 @@
 # Hardware products. Open-hardware designs that live in a repository can be projects instead.
+# `sites` lists where in the brain the device typically samples or acts: 10-05 electrode names (see
+# graph/electrodes.json) or ids from graph/regions.yaml. The first is the primary site. For devices whose
+# channels are user-placed (OpenBCI, Mentalab, PiEEG) a common montage is shown. Approximate and unverified.
 defaults: {type: device}
 nodes:
   # --- consumer and research sensing ---
-  - {id: openbci-cyton, modalities: [eeg, emg], name: OpenBCI Cyton, url: "https://openbci.com",
+  - {id: openbci-cyton, sites: [Fp1, Fp2, C3, C4, P7, P8, O1, O2], modalities: [eeg, emg], name: OpenBCI Cyton, url: "https://openbci.com",
      description: "8-channel (16 with Daisy) open-hardware biosensing board."}
-  - {id: openbci-ganglion, modalities: [eeg, emg], name: OpenBCI Ganglion, url: "https://openbci.com",
+  - {id: openbci-ganglion, sites: [Fp1, Fp2, O1, O2], modalities: [eeg, emg], name: OpenBCI Ganglion, url: "https://openbci.com",
      description: "4-channel Bluetooth LE open-hardware biosensing board."}
-  - {id: muse-headband, modalities: [eeg], name: Muse headbands, url: "https://choosemuse.com",
+  - {id: muse-headband, sites: [AF7, AF8, TP9, TP10], modalities: [eeg], name: Muse headbands, url: "https://choosemuse.com",
      description: "4-channel dry-electrode consumer EEG headbands."}
-  - {id: emotiv-headsets, modalities: [eeg], name: EMOTIV EPOC X / Insight, url: "https://www.emotiv.com",
+  - {id: emotiv-headsets, sites: [AF3, AF4, F7, F3, F4, F8, FC5, FC6, T7, T8, P7, P8, O1, O2, Pz], modalities: [eeg], name: EMOTIV EPOC X / Insight, url: "https://www.emotiv.com",
      description: "14- and 5-channel wireless EEG headsets."}
-  - {id: neurosity-crown, modalities: [eeg], name: Neurosity Crown, url: "https://neurosity.co",
+  - {id: neurosity-crown, sites: [CP3, C3, F5, PO3, PO4, F6, C4, CP4], modalities: [eeg], name: Neurosity Crown, url: "https://neurosity.co",
      description: "8-channel dry-electrode EEG headset."}
-  - {id: unicorn-hybrid-black, modalities: [eeg], name: Unicorn Hybrid Black, url: "https://www.gtec.at",
+  - {id: unicorn-hybrid-black, sites: [Fz, C3, Cz, C4, Pz, PO7, Oz, PO8], modalities: [eeg], name: Unicorn Hybrid Black, url: "https://www.gtec.at",
      description: "8-channel hybrid-electrode wireless EEG headset."}
-  - {id: mentalab-explore, modalities: [eeg, emg], name: Mentalab Explore, url: "https://mentalab.com",
+  - {id: mentalab-explore, sites: [Fp1, Fp2, C3, C4, P3, P4, O1, O2], modalities: [eeg, emg], name: Mentalab Explore, url: "https://mentalab.com",
      description: "Mobile ExG amplifier."}
-  - {id: pieeg-shield, modalities: [eeg], name: PiEEG shield, url: "https://pieeg.com",
+  - {id: pieeg-shield, sites: [Fp1, Fp2, C3, C4, P3, P4, O1, O2], modalities: [eeg], name: PiEEG shield, url: "https://pieeg.com",
      description: "8-channel EEG shield for Raspberry Pi."}
-  - {id: bioamp-exg-pill, modalities: [eeg, emg], name: BioAmp EXG Pill, url: "https://upsidedownlabs.tech",
+  - {id: bioamp-exg-pill, sites: [Fp1], modalities: [eeg, emg], name: BioAmp EXG Pill, url: "https://upsidedownlabs.tech",
      description: "Single-channel analog front end for biopotentials."}
-  - {id: kernel-flow, modalities: [fnirs], name: Kernel Flow, url: "https://www.kernel.com",
+  - {id: kernel-flow, sites: [Fp1, Fp2, F3, F4, C3, C4, T7, T8, P3, P4, O1, O2], modalities: [fnirs], name: Kernel Flow, url: "https://www.kernel.com",
      description: "Whole-head time-domain fNIRS headset."}
-  - {id: neuropixels, modalities: [intracortical], name: Neuropixels probes, url: "https://www.neuropixels.org",
+  - {id: neuropixels, sites: [dlpfc-left], modalities: [intracortical], name: Neuropixels probes, url: "https://www.neuropixels.org",
      description: "High-density silicon probes for extracellular recording."}
   - {id: open-ephys-acq-board, modalities: [intracortical], name: Open Ephys acquisition board, url: "https://open-ephys.org",
      description: "Open-hardware acquisition system for extracellular electrophysiology."}
-  - {id: starstim, modalities: [tes, eeg], name: Neuroelectrics Starstim, url: "https://www.neuroelectrics.com",
+  - {id: starstim, sites: [F3, Fp2], modalities: [tes, eeg], name: Neuroelectrics Starstim, url: "https://www.neuroelectrics.com",
      description: "Combined multichannel tES and EEG headset."}
 
-  - {id: nirsport2, modalities: [fnirs], name: NIRx NIRSport2, url: "https://nirx.net",
+  - {id: nirsport2, sites: [F3, F4, C3, C4], modalities: [fnirs], name: NIRx NIRSport2, url: "https://nirx.net",
      description: "Wearable research fNIRS system."}
-  - {id: mendi-headband, modalities: [fnirs], name: Mendi headband, url: "https://www.mendi.io",
+  - {id: mendi-headband, sites: [Fp1, Fp2], modalities: [fnirs], name: Mendi headband, url: "https://www.mendi.io",
      description: "Consumer fNIRS neurofeedback headband."}
   - {id: meta-neural-band, modalities: [emg], name: Meta Neural Band, url: "https://www.meta.com",
      description: "Wrist-worn surface EMG input device."}
 
   # --- implanted BCI ---
-  - {id: connexus, modalities: [intracortical], name: Paradromics Connexus, url: "https://www.paradromics.com",
+  - {id: connexus, sites: [speech-motor-left], modalities: [intracortical], name: Paradromics Connexus, url: "https://www.paradromics.com",
      description: "High-data-rate intracortical brain-computer interface."}
-  - {id: utah-array, modalities: [intracortical], name: Blackrock Utah array, url: "https://blackrockneurotech.com",
+  - {id: utah-array, sites: [m1-hand-left], modalities: [intracortical], name: Blackrock Utah array, url: "https://blackrockneurotech.com",
      description: "Penetrating microelectrode array used in most human intracortical BCI studies."}
-  - {id: neuralink-n1, modalities: [intracortical], name: Neuralink N1, url: "https://neuralink.com",
+  - {id: neuralink-n1, sites: [m1-hand-left], modalities: [intracortical], name: Neuralink N1, url: "https://neuralink.com",
      description: "Wireless implant with flexible intracortical electrode threads."}
-  - {id: stentrode, modalities: [endovascular], name: Synchron Stentrode, url: "https://synchron.com",
+  - {id: stentrode, sites: [motor-midline], modalities: [endovascular], name: Synchron Stentrode, url: "https://synchron.com",
      description: "Endovascular electrode array placed in a blood vessel next to motor cortex."}
 
   # --- clinical neuromodulation ---
-  - {id: medtronic-percept, modalities: [dbs], name: Medtronic Percept, url: "https://www.medtronic.com",
+  - {id: medtronic-percept, sites: [stn-left, stn-right], modalities: [dbs], name: Medtronic Percept, url: "https://www.medtronic.com",
      description: "DBS neurostimulator that can also record local field potentials."}
-  - {id: neuropace-rns, modalities: [rns], name: NeuroPace RNS System, url: "https://www.neuropace.com",
+  - {id: neuropace-rns, sites: [hippocampus-left, hippocampus-right], modalities: [rns], name: NeuroPace RNS System, url: "https://www.neuropace.com",
      description: "Closed-loop responsive neurostimulator for epilepsy."}
-  - {id: vns-therapy, modalities: [vns], name: LivaNova VNS Therapy, url: "https://www.livanova.com",
+  - {id: vns-therapy, sites: [vagus-left], modalities: [vns], name: LivaNova VNS Therapy, url: "https://www.livanova.com",
      description: "Implanted vagus nerve stimulator."}
-  - {id: proclaim-scs, modalities: [scs], name: Abbott Proclaim SCS, url: "https://www.abbott.com",
+  - {id: proclaim-scs, sites: [spinal-cord], modalities: [scs], name: Abbott Proclaim SCS, url: "https://www.abbott.com",
      description: "Implanted spinal cord stimulator."}
-  - {id: cochlear-nucleus, modalities: [cochlear-implant], name: Cochlear Nucleus, url: "https://www.cochlear.com",
+  - {id: cochlear-nucleus, sites: [cochlea-left, cochlea-right], modalities: [cochlear-implant], name: Cochlear Nucleus, url: "https://www.cochlear.com",
      description: "Cochlear implant system."}
-  - {id: neurostar-tms, modalities: [tms], name: NeuroStar TMS, url: "https://neurostar.com",
+  - {id: neurostar-tms, sites: [dlpfc-left], modalities: [tms], name: NeuroStar TMS, url: "https://neurostar.com",
      description: "Clinical TMS therapy system."}
-  - {id: brainsway-deep-tms, modalities: [tms], name: BrainsWay Deep TMS, url: "https://www.brainsway.com",
+  - {id: brainsway-deep-tms, sites: [dlpfc-left, dmpfc], modalities: [tms], name: BrainsWay Deep TMS, url: "https://www.brainsway.com",
      description: "H-coil TMS therapy system."}
-  - {id: flow-fl100, modalities: [tes], name: Flow FL-100, url: "https://www.flowneuroscience.com",
+  - {id: flow-fl100, sites: [F3, F4], modalities: [tes], name: Flow FL-100, url: "https://www.flowneuroscience.com",
      description: "Home-use tDCS headset for depression."}

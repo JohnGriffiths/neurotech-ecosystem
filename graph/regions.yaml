@@ -1,0 +1,19 @@
+# Named brain targets in MNI152 space (millimetres: x right, y anterior, z superior), used as device `sites`.
+# These are typical or textbook target coordinates written from memory, approximate to roughly 5-10 mm and
+# not checked against sources. Treat them as "this is the region", not as surgical coordinates.
+# `inside: false` marks a site outside the brain (the cochlea, the neck, the spinal cord); it is drawn
+# beyond the brain surface rather than in it.
+regions:
+  stn-left:       {name: Subthalamic nucleus (left), mni: [-12, -13, -7]}
+  stn-right:      {name: Subthalamic nucleus (right), mni: [12, -13, -7]}
+  hippocampus-left:  {name: Hippocampus (left), mni: [-28, -22, -12]}
+  hippocampus-right: {name: Hippocampus (right), mni: [28, -22, -12]}
+  m1-hand-left:   {name: Primary motor cortex, hand area (left), mni: [-38, -22, 58]}
+  motor-midline:  {name: Motor cortex, superior sagittal sinus (midline), mni: [0, -20, 70]}
+  speech-motor-left: {name: Ventral sensorimotor cortex, speech area (left), mni: [-57, -4, 30]}
+  dlpfc-left:     {name: Dorsolateral prefrontal cortex (left), mni: [-44, 40, 29]}
+  dmpfc:          {name: Dorsomedial prefrontal cortex, mni: [0, 42, 34]}
+  cochlea-left:   {name: Cochlea (left inner ear), mni: [-42, -24, -36], inside: false}
+  cochlea-right:  {name: Cochlea (right inner ear), mni: [42, -24, -36], inside: false}
+  vagus-left:     {name: Left cervical vagus nerve (neck), mni: [-24, -30, -88], inside: false}
+  spinal-cord:    {name: Thoracic spinal cord (epidural), mni: [0, -48, -115], inside: false}

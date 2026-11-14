@@ -15,8 +15,8 @@ and projects whose `checked` date is missing or older than this year.
 | Type | What it is | Extra fields |
 |---|---|---|
 | `project` | **The main entity.** Almost always a GitHub repository. | `repo: owner/name`; `kind`: `software`, `hardware`, `dataset`, `standard`, `resource`; `layer`; `status`: `exists` (default) or `proposed`; `modalities` |
-| `device` | A hardware product. | `modalities` |
-| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator`; `modalities`; `country`; `status`: `active`, `acquired`, `defunct`, `unknown` |
+| `device` | A hardware product. | `modalities`; `sites`: where in the brain it typically samples or acts |
+| `org` | A company, university, lab or other group. | `kind`: `company`, `university`, `institute`, `lab`, `oss_team`, `community`, `standards_body`, `regulator`; `modalities`; `city`; `country`; `status`: `active`, `acquired`, `defunct`, `unknown` |
 | `person` | Someone with a public role on a project or organisation. | `github` (optional handle) |
 | `modality` | A technology: EEG, MEG, fMRI, DBS, TMS… | `class`: `sensing`, `modulating` or `[sensing, modulating]`; `invasiveness`: `invasive` or `noninvasive` |
 | `indication` | A condition that clinical neurotechnology diagnoses or treats. | |
@@ -32,6 +32,26 @@ Notes:
 - `tags` are free-form. `flagship` marks the NeuroTechX flagship projects.
 - `python tools/ntgraph.py check-repos` confirms that every `repo` is reachable on GitHub.
 - A `proposed` project is one that should exist but does not. It appears on the gaps board.
+
+## Places and brain sites
+
+Two layouts in the viewer place nodes in space. Both rest on reference data that is generated, not
+hand-edited.
+
+**Map (organisations).** An organisation's `city` and `country` are resolved to coordinates through
+`graph/places.json`. Hand-written organisations get theirs from `graph/locations.yaml` (`id: "City, Country"`),
+so their node files stay untouched; imported companies carry their own. A place not found as a city falls
+back to the centre of its country, and the exported node says which (`geo.precision`). Regenerate the
+places after adding locations: `python tools/geocode_places.py` (needs `pip install geonamescache`).
+Small towns the gazetteer lacks are listed in that script's `MANUAL` table.
+
+**Brain (devices).** A device's `sites` is a list of 10-05 electrode names (`graph/electrodes.json`, with an
+MNI position for each) or ids from `graph/regions.yaml` (named targets such as `stn-left`, with MNI
+coordinates in mm). The first site is the primary one and is where the node is pinned; the others are drawn
+as markers joined to it. An electrode's position is the point on the cortex beneath it. The template brain
+is `web/brain.json`. All of this is approximate, about 5 to 10 mm, and written from memory, so it is
+unverified like the rest. Regenerate electrodes and the brain with `python tools/make_brain_data.py` (needs
+`pip install nilearn mne scikit-image scipy`); the coastlines with `node tools/make_world_data.js`.
 
 ## Edges
 

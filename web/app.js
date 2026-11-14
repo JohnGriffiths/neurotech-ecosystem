@@ -49,14 +49,27 @@ const LINK_DISTANCE = { USES: 90, AFFILIATED_WITH: 30, MAINTAINS: 38 };
 
 const state = {
   lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: true,
-  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true,
+  selected: null, hovered: null, highlight: null, mode: "3d", rotate: true, layout: "network",
+};
+const ref = {}; // reference geometry loaded on demand: ref.world (map outlines), ref.brain (template surface)
+const GLOBE_R = 230, MAP_K = 2.2;                       // globe radius; degrees-to-units scale of the flat map
+const BRAIN_CENTRE = [0, 15, 18];                        // middle of the brain in scene units (MNI 0,-18,15)
+const toScene = (m) => [m[0], m[2], -m[1]];             // MNI (x right, y anterior, z superior) -> scene (y up)
+const llToVec = (lat, lng, R) => {
+  const a = (lat * Math.PI) / 180, b = (lng * Math.PI) / 180;
+  return [R * Math.cos(a) * Math.sin(b), R * Math.sin(a), R * Math.cos(a) * Math.cos(b)];
+};
+const LAYOUT_NOTE = {
+  network: "",
+  map: "Organisations pinned to their headquarters or main site. Where only the country is known the pin sits at the centre of its cities.",
+  brain: "Devices at the place in the brain where they typically sample or act, in MNI space. Approximate; user-placed devices show a common montage.",
 };
 let graph, byId, view = null, C = {}, adjacency = {}, allLinks = [];
 
 // ------------------------------------------------------------------ colour ---
 function readTheme() {
   const cs = getComputedStyle(document.documentElement);
-  for (const k of ["teal", "yellow", "magenta", "violet", "neutral", "text", "text-2", "bg", "link", "link-hi"]) {
+  for (const k of ["bg-glow", "teal", "yellow", "magenta", "violet", "neutral", "text", "text-2", "bg", "link", "link-hi"]) {
     C[k] = cs.getPropertyValue(`--${k}`).trim();
   }
 }
@@ -135,7 +148,7 @@ function drawNode(n, ctx, scale) {
     ctx.lineWidth = 1.5 / scale; ctx.strokeStyle = C.text; ctx.stroke();
   }
   // Labels: hubs first, more as you zoom in; always for the lit neighbourhood.
-  const always = focus || (state.highlight && lit) || n.type === "modality" || n.hub;
+  const always = focus || (state.highlight && lit) || n.type === "modality" || n.hub || state.layout === "brain";
   if (lit && (always || n.r * scale > 8.5)) {
     const size = (focus ? 13 : 11) / scale;
     ctx.font = `${focus || n.type === "modality" ? 600 : 400} ${size}px ui-sans-serif, system-ui, sans-serif`;
@@ -165,10 +178,15 @@ function linkColor(l) {
 }
 
 // ----------------------------------------------------------------- filters ---
+/** Does the node have a place in the current layout? Map needs a location, Brain needs brain sites. */
+function inLayout(n) {
+  return state.layout === "map" ? !!n.geo : state.layout === "brain" ? !!n.brain : true;
+}
 function passes(n) {
   const f = n.facets;
   return state.types.has(n.type)
-    && (!state.connected || n.deg > 0)
+    && inLayout(n)
+    && (state.layout !== "network" || !state.connected || n.deg > 0)
     && (!state.cls || f.class.includes(state.cls))
     && (!state.inv || f.invasiveness.includes(state.inv))
     && (!state.modality || f.modalities.includes(state.modality))
@@ -177,14 +195,18 @@ function passes(n) {
 function applyFilters() {
   const nodes = graph.nodes.filter(passes);
   const ids = new Set(nodes.map((n) => n.id));
-  const links = allLinks.filter((l) => ids.has(endId(l.source)) && ids.has(endId(l.target)));
+  const links = state.layout !== "network" ? [] : allLinks.filter((l) => ids.has(endId(l.source)) && ids.has(endId(l.target)));
   view.setData({ nodes, links });
   state.touched = false;
   if (state.selected && !ids.has(state.selected)) select(null);
   const verified = graph.edges.filter((e) => e.status === "verified").length;
   const loose = graph.nodes.filter((n) => !n.deg).length;
-  $("#stats").textContent = `${nodes.length} of ${graph.nodes.length} entities · ${links.length} links · ${verified} of ${graph.edges.length} verified`
-    + (state.connected && loose ? ` · ${loose} unconnected hidden` : "");
+  const placeable = graph.nodes.filter(inLayout).length;
+  $("#stats").textContent = state.layout === "network"
+    ? `${nodes.length} of ${graph.nodes.length} entities · ${links.length} links · ${verified} of ${graph.edges.length} verified`
+      + (state.connected && loose ? ` · ${loose} unconnected hidden` : "")
+    : `${nodes.length} of ${placeable} ${state.layout === "map" ? "organisations on the map" : "devices with a brain site"}`
+      + ` · ${graph.nodes.length - placeable} have no ${state.layout === "map" ? "location" : "site"}`;
 }
 function resetFilters() {
   Object.assign(state, { types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: false });
@@ -237,6 +259,7 @@ function refreshHighlight() {
   if (view) view.restyle();
 }
 function select(id, { fly = false } = {}) {
+  if (id && !inLayout(byId[id])) applyLayout("network");
   if (id && !passes(byId[id])) { resetFilters(); applyFilters(); }
   state.selected = id;
   refreshHighlight();
@@ -268,7 +291,7 @@ function renderDetail() {
   const chips = [
     ...(n.type === "problem" ? [] : [...f.class.map(cap), ...f.invasiveness.map(cap)]),
     f.clinical && n.type !== "problem" && "Clinical", n.layer && cap(n.layer), n.status === "proposed" && "Proposed",
-    n.type === "org" && n.status && n.status !== "unknown" && cap(n.status), n.country,
+    n.type === "org" && n.status && n.status !== "unknown" && cap(n.status), n.city, n.country,
     ...(n.tags || []).slice(0, 8).map(cap),
   ].filter(Boolean);
   const SOURCES = { "ntx-ecosystem-2022": "NeuroTechX ecosystem database, 2022 snapshot" };
@@ -291,8 +314,18 @@ function renderDetail() {
     el("h2", { className: "name", textContent: n.name }),
     chips.length ? el("div", { className: "chips" }, ...chips.map((c) => el("span", { className: "tag", textContent: c }))) : null,
     el("p", { textContent: n.description }),
-    provenance,
-    repo);
+    ...[provenance, repo].filter(Boolean));
+  if (n.geo) {
+    panel.append(el("p", { className: "provenance", textContent: n.geo.precision === "city"
+      ? "Map position: its city (approximate)." : "Map position: the centre of its country; the city is not known." }));
+  }
+  if (n.brain) {
+    panel.append(
+      el("h3", { textContent: `Typical sites · ${n.brain.length}` }),
+      el("ul", { className: "rel" }, ...n.brain.map((site) => el("li", {},
+        site.label, " ", el("span", { className: "tag", textContent: `MNI ${site.mni.join(", ")}` })))),
+      el("p", { className: "provenance", textContent: "Positions are approximate (about 5 to 10 mm) and unverified." }));
+  }
 
   const groups = new Map();
   graph.edges.forEach((e) => {
@@ -376,6 +409,63 @@ function bindSearch() {
 // --------------------------------------------------------------- renderers ---
 // Two interchangeable views of the same data: { fg, setData, restyle, focus, fit, resize, destroy }.
 
+/** Scene position of the pin for each node in the current layout; `null` outside network layout. */
+function layoutPosition(n, three) {
+  const point = state.layout === "map" ? n.geo : state.layout === "brain" ? n.brain && n.brain[0] : null;
+  if (!point) return null;
+  if (state.layout === "map") return three ? llToVec(point.lat, point.lng, GLOBE_R) : [point.lng * MAP_K, -point.lat * MAP_K];
+  return three ? toScene(point.mni) : [point.mni[0], -point.mni[1]];
+}
+
+/** Pin nodes to their place in the Map or Brain layout, fanning out those that share one spot. */
+function pinNodes() {
+  const three = state.mode === "3d";
+  graph.nodes.forEach((n) => { delete n.fx; delete n.fy; delete n.fz; n.r = state.layout === "network" ? n.r0 : state.layout === "map" ? 2.4 : 3.4; });
+  if (state.layout === "network") return;
+  const groups = new Map();
+  graph.nodes.forEach((n) => {
+    const at = layoutPosition(n, three);
+    if (!at) return;
+    const key = at.map((v) => Math.round(v * 10)).join(",");
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(n);
+  });
+  const gap = state.layout === "map" ? 5.2 : 8.5;
+  const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((c) => c / l); };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  for (const items of groups.values()) {
+    items.sort((a, b) => (a.id < b.id ? -1 : 1));
+    const base = layoutPosition(items[0], three);
+    // Tangent plane at the pin: on the globe or around the brain, perpendicular to the radius.
+    let east, north;
+    if (three) {
+      const centre = state.layout === "map" ? [0, 0, 0] : BRAIN_CENTRE;
+      const radial = norm(base.map((v, i) => v - centre[i]));
+      east = norm(cross(Math.abs(radial[1]) > 0.98 ? [1, 0, 0] : [0, 1, 0], radial));
+      north = cross(radial, east);
+    }
+    items.forEach((n, i) => {
+      const r = items.length === 1 ? 0 : gap * Math.sqrt(i + 0.35), a = i * 2.39996;
+      const dx = r * Math.cos(a), dy = r * Math.sin(a);
+      let pos;
+      if (!three) pos = [base[0] + dx, base[1] + dy];
+      else {
+        pos = base.map((v, k) => v + east[k] * dx + north[k] * dy);
+        if (state.layout === "map") pos = norm(pos).map((v) => v * GLOBE_R); // stay on the sphere
+      }
+      [n.fx, n.fy, n.fz] = pos; [n.x, n.y, n.z] = pos;
+      if (!three) { delete n.fz; n.z = 0; }
+    });
+  }
+}
+
+/** Default camera direction for a layout (3D). `undefined` keeps the current one. */
+function layoutDirection() {
+  if (state.layout === "map") return llToVec(32, -35, 1);
+  if (state.layout === "brain") return [-0.8, 0.5, -1];
+  return undefined;
+}
+
 /** Gentle pull to the centre so disconnected clusters stay in frame. */
 function gravityForce(k, dims) {
   let nodes = [];
@@ -404,6 +494,42 @@ function commonSetup(fg, dims) {
   return fg;
 }
 
+/** Flat map outlines, or the axial head outline with the extra sites of multi-site devices. */
+function drawBackdrop2d(ctx, scale) {
+  if (state.layout === "map" && ref.world) {
+    const trace = (lines) => {
+      ctx.beginPath();
+      for (const line of lines) line.forEach(([lng, lat], i) => ctx[i ? "lineTo" : "moveTo"](lng * MAP_K, -lat * MAP_K));
+    };
+    ctx.save();
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 0.8 / scale; ctx.strokeStyle = alpha(C["text-2"], 0.16); trace(ref.world.borders); ctx.stroke();
+    ctx.lineWidth = 1.1 / scale; ctx.strokeStyle = alpha(C["text-2"], 0.5); trace(ref.world.coast); ctx.stroke();
+    ctx.restore();
+  } else if (state.layout === "brain" && ref.brain) {
+    ctx.save();
+    ctx.beginPath();
+    ref.brain.outline.axial.forEach(([x, y], i) => ctx[i ? "lineTo" : "moveTo"](x, -y));
+    ctx.closePath();
+    ctx.fillStyle = alpha(C.teal, 0.06); ctx.fill();
+    ctx.lineWidth = 1.4 / scale; ctx.strokeStyle = alpha(C["text-2"], 0.5); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, -75); ctx.lineTo(0, 78);           // midline
+    ctx.moveTo(-72, 0); ctx.lineTo(72, 0);                              // coronal plane through the anterior commissure
+    ctx.lineWidth = 0.6 / scale; ctx.strokeStyle = alpha(C["text-2"], 0.16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-9, -88); ctx.lineTo(0, -100); ctx.lineTo(9, -88); ctx.closePath();
+    ctx.fillStyle = alpha(C["text-2"], 0.5); ctx.fill();                // nose: anterior is up
+    for (const n of view ? view.fg.graphData().nodes : []) {
+      if (!n.brain || n.brain.length < 2 || !isLit(n)) continue;
+      ctx.beginPath();
+      for (const site of n.brain.slice(1)) { ctx.moveTo(n.x, n.y); ctx.lineTo(site.mni[0], -site.mni[1]); }
+      ctx.lineWidth = 0.6 / scale; ctx.strokeStyle = alpha(nodeColors(n)[0], 0.4); ctx.stroke();
+      ctx.fillStyle = alpha(nodeColors(n)[0], 0.8);
+      for (const site of n.brain.slice(1)) { ctx.beginPath(); ctx.arc(site.mni[0], -site.mni[1], 1.6, 0, 2 * Math.PI); ctx.fill(); }
+    }
+    ctx.restore();
+  }
+}
+
 function make2d(container) {
   const fg = commonSetup(new ForceGraph(container), 2)
     .backgroundColor("rgba(0,0,0,0)")
@@ -415,11 +541,13 @@ function make2d(container) {
     .linkDirectionalArrowLength((l) => (linkLit(l) ? 4.5 : l.type === "USES" ? 0 : 2.2))
     .linkDirectionalParticleWidth(2.6)
     .autoPauseRedraw(false)
+    .onRenderFramePre((ctx, scale) => drawBackdrop2d(ctx, scale))
     .warmupTicks(140).cooldownTicks(260);
   fg.d3Force("charge").strength(-260).distanceMax(600);
   return {
     fg,
     setData: (d) => fg.graphData(d),
+    setLayout: () => {}, // the canvas backdrop is drawn from state every frame
     restyle: () => {}, // the canvas redraws from state every frame
     focus: (n) => { fg.centerAt(n.x, n.y, 700); fg.zoom(Math.max(fg.zoom(), 2), 700); },
     fit: (ms) => fg.zoomToFit(ms, window.innerWidth < 820 ? 30 : 70),
@@ -468,7 +596,22 @@ function make3d(container) {
     mesh.scale.setScalar(n.r * 0.85);
     if (TYPES[n.type].shape === "triangle-down") mesh.rotation.x = Math.PI;
     const group = new T.Group(); group.add(mesh);
-    n.__o = { group, mesh, hollow, label: null, holder: null, halo: null, map: null };
+    n.__o = { group, mesh, hollow, label: null, holder: null, halo: null, map: null, sites: null };
+    if (n.brain && n.brain.length > 1) { // a star from the primary site to the others, shown in the Brain layout
+      const first = toScene(n.brain[0].mni), sites = new T.Group(), pts = [];
+      const lineMat = new T.LineBasicMaterial({ transparent: true, opacity: 0.45 });
+      const dotMat = new T.MeshBasicMaterial({ transparent: true, opacity: 0.85 });
+      for (const site of n.brain.slice(1)) {
+        const at = toScene(site.mni).map((v, k) => v - first[k]);
+        pts.push(0, 0, 0, ...at);
+        const dot = new T.Mesh(geometry.circle, dotMat); dot.scale.setScalar(1.7); dot.position.set(...at); dot.raycast = () => {};
+        sites.add(dot);
+      }
+      const lines = new T.BufferGeometry(); lines.setAttribute("position", new T.Float32BufferAttribute(pts, 3));
+      const star = new T.LineSegments(lines, lineMat); star.raycast = () => {};
+      sites.add(star); group.add(sites);
+      n.__o.sites = { group: sites, lineMat, dotMat };
+    }
     style(n);
     return group;
   }
@@ -479,13 +622,18 @@ function make3d(container) {
     const colors = nodeColors(n), lit = isLit(n);
     const focus = n.id === state.selected || n.id === state.hovered;
     const m = o.mesh.material, r = n.r * 0.85;
+    o.mesh.scale.setScalar(r);
     const map = colors[1] && !o.hollow ? striped(colors[0], colors[1]) : null;
     if (map !== o.map) { m.map = map; o.map = map; m.needsUpdate = true; }
     m.color.set(map ? "#ffffff" : colors[0]);
     m.opacity = lit ? 1 : 0.06; m.depthWrite = lit;
 
+    if (o.sites) {
+      o.sites.group.visible = state.layout === "brain" && lit;
+      o.sites.lineMat.color.set(colors[0]); o.sites.dotMat.color.set(colors[0]);
+    }
     const strong = focus || n.type === "modality";
-    const wanted = lit && (strong || !!state.highlight || n.hub);
+    const wanted = lit && (strong || !!state.highlight || n.hub || state.layout === "brain");
     if (wanted && !o.label) {
       o.label = new SpriteText(n.name, 4);
       Object.assign(o.label, { fontFace: "ui-sans-serif, system-ui, sans-serif", strokeWidth: 1.5, padding: 1 });
@@ -496,7 +644,7 @@ function make3d(container) {
     if (o.label) {
       o.label.visible = wanted;
       if (wanted) {
-        const want = { color: strong ? C.text : C["text-2"], strokeColor: C.bg, textHeight: focus ? 5.4 : 4, fontWeight: strong ? "600" : "400" };
+        const want = { color: strong ? C.text : C["text-2"], strokeColor: C.bg, textHeight: (focus ? 5.4 : 4) * (state.layout === "brain" ? 0.75 : 1), fontWeight: strong ? "600" : "400" };
         for (const [k, v] of Object.entries(want)) if (o.label[k] !== v) o.label[k] = v; // each set re-rasterises
         o.gap = r * 1.35; o.rise = want.textHeight * 0.85;
       }
@@ -521,7 +669,60 @@ function make3d(container) {
   const controls = fg.controls();
   Object.assign(controls, { enableDamping: true, dampingFactor: 0.12, autoRotateSpeed: 0.6, autoRotate: state.rotate });
   const fog = fg.scene().fog = new T.Fog(C.bg, 1, 4000); // depth cue: far nodes fade into the background
-  let radius = 400, alive = true;
+  let radius = 400, alive = true, backdrop = null;
+
+  /** A globe with coastlines and borders, or the template brain, drawn behind the pinned nodes. */
+  function buildBackdrop(layout) {
+    if (layout === "map" && ref.world) {
+      const group = new T.Group();
+      const sphere = new T.Mesh(new T.SphereGeometry(GLOBE_R - 1.5, 64, 40), new T.MeshBasicMaterial({ color: C["bg-glow"] }));
+      sphere.renderOrder = -2; group.add(sphere);
+      const lines = (polylines, key) => {
+        const pts = [];
+        for (const line of polylines) {
+          for (let i = 1; i < line.length; i++) {
+            const [lng0, lat0] = line[i - 1], [lng1, lat1] = line[i];
+            const steps = Math.max(1, Math.ceil(Math.max(Math.abs(lng1 - lng0), Math.abs(lat1 - lat0)) / 2)); // follow the curve
+            for (let k = 0; k < steps; k++) {
+              pts.push(...llToVec(lat0 + ((lat1 - lat0) * k) / steps, lng0 + ((lng1 - lng0) * k) / steps, GLOBE_R),
+                       ...llToVec(lat0 + ((lat1 - lat0) * (k + 1)) / steps, lng0 + ((lng1 - lng0) * (k + 1)) / steps, GLOBE_R));
+            }
+          }
+        }
+        const geo = new T.BufferGeometry(); geo.setAttribute("position", new T.Float32BufferAttribute(pts, 3));
+        const mesh = new T.LineSegments(geo, new T.LineBasicMaterial({ transparent: true }));
+        mesh.userData.key = key; mesh.raycast = () => {}; group.add(mesh);
+      };
+      lines(ref.world.borders, "borders"); lines(ref.world.coast, "coast");
+      return group;
+    }
+    if (layout === "brain" && ref.brain) {
+      const group = new T.Group();
+      const verts = [];
+      for (let i = 0; i < ref.brain.mesh.v.length; i += 3) verts.push(...toScene(ref.brain.mesh.v.slice(i, i + 3)));
+      const geo = new T.BufferGeometry();
+      geo.setAttribute("position", new T.Float32BufferAttribute(verts, 3));
+      geo.setIndex(ref.brain.mesh.f); geo.computeVertexNormals();
+      const shell = new T.Mesh(geo, new T.MeshLambertMaterial({ transparent: true, opacity: 0.1, side: T.DoubleSide, depthWrite: false }));
+      const mesh = new T.Mesh(geo, new T.MeshBasicMaterial({ transparent: true, opacity: 0.07, wireframe: true, depthWrite: false }));
+      shell.userData.key = "shell"; mesh.userData.key = "wire";
+      shell.raycast = mesh.raycast = () => {};
+      group.add(shell, mesh);
+      return group;
+    }
+    return null;
+  }
+  function paintBackdrop() {
+    if (!backdrop) return;
+    backdrop.children.forEach((o) => {
+      const k = o.userData.key, m = o.material;
+      if (k === "coast") { m.color.set(C["text-2"]); m.opacity = 0.55; }
+      else if (k === "borders") { m.color.set(C["text-2"]); m.opacity = 0.16; }
+      else if (k === "shell") m.color.set(C.teal);
+      else if (k === "wire") m.color.set(C["text-2"]);
+      else if (m.color) m.color.set(C["bg-glow"]);
+    });
+  }
 
   // Per frame: fog tracks the camera, and labels grow with distance so they stay about 12px on screen.
   (function frame() {
@@ -542,33 +743,88 @@ function make3d(container) {
   return {
     fg,
     setData: (d) => fg.graphData(d),
+    setLayout: (layout) => {
+      if (backdrop) { fg.scene().remove(backdrop); backdrop.traverse((o) => { o.geometry && o.geometry.dispose(); }); backdrop = null; }
+      backdrop = buildBackdrop(layout);
+      if (backdrop) { fg.scene().add(backdrop); paintBackdrop(); }
+      fg.graphData().nodes.forEach(style);
+    },
     restyle: () => {
       fog.color.set(C.bg);
+      paintBackdrop();
       fg.graphData().nodes.forEach(style);
       // Re-setting an accessor makes the library re-evaluate it for every link.
       fg.linkColor(fg.linkColor()).linkWidth(fg.linkWidth())
         .linkDirectionalArrowLength(fg.linkDirectionalArrowLength()).linkDirectionalParticles(fg.linkDirectionalParticles());
     },
     focus: (n) => {
+      if (state.layout !== "network") { // look at the pin from outside the globe, or from the side of the brain
+        const c = state.layout === "map" ? [0, 0, 0] : BRAIN_CENTRE;
+        const dir = [n.x - c[0], n.y - c[1], n.z - c[2]], len = Math.hypot(...dir) || 1;
+        const back = state.layout === "map" ? 160 : 190, away = len < 30 ? layoutDirection() : dir.map((v) => v / len);
+        const u = Math.hypot(...away) || 1;
+        fg.cameraPosition({ x: n.x + (away[0] / u) * back, y: n.y + (away[1] / u) * back, z: n.z + (away[2] / u) * back }, n, 900);
+        return;
+      }
       const d = Math.hypot(n.x, n.y, n.z) || 1, k = 1 + (window.innerWidth < 820 ? 560 : 300) / d;
       fg.cameraPosition({ x: n.x * k, y: n.y * k, z: n.z * k }, n, 900);
     },
-    fit: (ms) => {
-      // Frame the bounding sphere of the laid-out nodes, keeping the current viewing direction.
+    fit: (ms, dir) => {
+      // Frame the bounding sphere of the laid-out nodes, keeping the current viewing direction unless one is given.
       const nodes = fg.graphData().nodes.filter((n) => Number.isFinite(n.x));
       if (!nodes.length) return;
-      radius = Math.max(60, ...nodes.map((n) => Math.hypot(n.x, n.y, n.z) + n.r));
+      const c = state.layout === "brain" ? BRAIN_CENTRE : [0, 0, 0];
+      radius = Math.max(60, ...nodes.map((n) => Math.hypot(n.x - c[0], n.y - c[1], n.z - c[2]) + n.r));
+      if (state.layout === "map") radius = GLOBE_R + 10;
+      if (state.layout === "brain") radius = Math.max(radius, 95);   // keep the whole brain in frame
       const cam = fg.camera();
       const vertical = (cam.fov * Math.PI) / 360;
       const half = Math.min(vertical, Math.atan(Math.tan(vertical) * cam.aspect));
-      const dist = (radius / Math.sin(half)) * 0.92;
-      const p = cam.position, len = Math.hypot(p.x, p.y, p.z) || 1;
-      fg.cameraPosition({ x: (p.x / len) * dist, y: (p.y / len) * dist, z: (p.z / len) * dist }, { x: 0, y: 0, z: 0 }, ms);
+      const dist = (radius / Math.sin(half)) * (state.layout === "map" ? 1.2 : state.layout === "brain" ? 1.1 : 0.92);
+      const p = dir ? { x: dir[0], y: dir[1], z: dir[2] } : { x: cam.position.x - c[0], y: cam.position.y - c[1], z: cam.position.z - c[2] };
+      const len = Math.hypot(p.x, p.y, p.z) || 1;
+      fg.cameraPosition({ x: c[0] + (p.x / len) * dist, y: c[1] + (p.y / len) * dist, z: c[2] + (p.z / len) * dist }, { x: c[0], y: c[1], z: c[2] }, ms);
     },
     resize: () => fg.width(window.innerWidth).height(window.innerHeight),
     setRotate: (on) => { controls.autoRotate = on; },
     destroy: () => { alive = false; fg._destructor(); container.replaceChildren(); },
   };
+}
+
+/** Switch layout once its reference data is available. Falls back to the network if that cannot be loaded. */
+async function setLayout(layout) {
+  const note = $("#layout-note");
+  try {
+    if (layout === "map" && !ref.world) ref.world = await (await fetch("world.json")).json();
+    if (layout === "brain" && !ref.brain) ref.brain = await (await fetch("brain.json")).json();
+  } catch (err) {
+    console.error(err);
+    note.textContent = "Could not load the reference data for that layout.";
+    layout = "network";
+  }
+  applyLayout(layout);
+}
+
+function applyLayout(layout) {
+  state.layout = layout;
+  document.body.dataset.layout = layout;
+  setSeg("#layout", layout);
+  $("#layout-note").textContent = LAYOUT_NOTE[layout];
+  $("#layout-note").hidden = !LAYOUT_NOTE[layout];
+  pinNodes();
+  view.setLayout(layout);
+  state.touched = false;
+  applyFilters();
+  if (layout !== "network" && state.rotate && layout === "brain") setRotate(false);
+  view.fg.d3ReheatSimulation && view.fg.d3ReheatSimulation();
+  const mine = view;
+  let frames = 0;
+  (function settle() {   // wait until the new data has positions, then frame it
+    if (view !== mine) return;
+    const nodes = view.fg.graphData().nodes;
+    if (nodes.length && !Number.isFinite(nodes[0].x) && ++frames < 30) { requestAnimationFrame(settle); return; }
+    view.fit(700, layoutDirection());
+  })();
 }
 
 function webglAvailable() {
@@ -593,6 +849,8 @@ function mount(mode) {
   if (!view) { state.mode = "2d"; view = make2d(container); }
   view.resize();
   refreshHighlight();
+  pinNodes();
+  view.setLayout(state.layout);
   applyFilters();
   setSeg("#dims", state.mode);
   document.body.dataset.mode = state.mode;
@@ -604,7 +862,7 @@ function mount(mode) {
     if (view !== mine) return;
     const nodes = view.fg.graphData().nodes;
     if (!nodes.length || !Number.isFinite(nodes[0].x) || ++frames < 5) { requestAnimationFrame(whenLaidOut); return; }
-    view.fit(0);
+    view.fit(0, layoutDirection());
     const start = state.selected || location.hash.slice(1);
     if (byId[start]) select(start, { fly: true });
   })();
@@ -617,7 +875,7 @@ function initGraph() {
     degree[e.from] = (degree[e.from] || 0) + 1; degree[e.to] = (degree[e.to] || 0) + 1;
     (adjacency[e.from] ||= new Set()).add(e.to); (adjacency[e.to] ||= new Set()).add(e.from);
   });
-  graph.nodes.forEach((n) => { n.deg = degree[n.id] || 0; n.r = TYPES[n.type].base + 1.5 * Math.sqrt(n.deg); });
+  graph.nodes.forEach((n) => { n.deg = degree[n.id] || 0; n.r0 = TYPES[n.type].base + 1.5 * Math.sqrt(n.deg); n.r = n.r0; });
   graph.nodes.filter((n) => n.type === "project").sort((a, b) => (degree[b.id] || 0) - (degree[a.id] || 0))
     .slice(0, 14).forEach((n) => { n.hub = true; });
   allLinks = graph.edges.map((e) => ({ source: e.from, target: e.to, type: e.type }));
@@ -634,6 +892,8 @@ function initGraph() {
   // Taking hold of the graph stops the idle spin.
   $("#graph").addEventListener("pointerdown", () => { state.touched = true; if (state.rotate) setRotate(false); });
   $("#graph").addEventListener("wheel", () => { state.touched = true; }, { passive: true });
+  bindSeg("#layout", (v) => { if (v !== state.layout) setLayout(v); });
+  if (["#map", "#brain"].includes(location.hash)) setLayout(location.hash.slice(1));
   bindSeg("#dims", (v) => {
     try { localStorage.setItem("dims", v); } catch (e) { /* private mode */ }
     mount(v);

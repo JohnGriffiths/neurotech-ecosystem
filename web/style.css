@@ -88,6 +88,7 @@ h2 { font: 400 10.5px/1.5 var(--display); text-transform: uppercase; letter-spac
 .seg { display: flex; padding: 2px; border-radius: 9px; background: var(--fill); }
 .seg button { flex: 1; border: 0; background: none; padding: 4px 6px; border-radius: 7px; font-size: 12px; color: var(--text-2); white-space: nowrap; }
 .seg button[aria-checked="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.layout-note { margin-top: 8px; font-size: 12px; line-height: 1.45; color: var(--muted); }
 .legend { margin-top: 10px; display: grid; gap: 1px; }
 .legend button { display: flex; align-items: center; gap: 9px; width: 100%; border: 0; background: none; padding: 3px 4px;
                  border-radius: 6px; text-align: left; }

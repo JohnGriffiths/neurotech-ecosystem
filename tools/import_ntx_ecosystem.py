@@ -56,6 +56,14 @@ COUNTRY = {
 # Source rows that are an organisation already in the graph under a newer name.
 ALIASES = {"blackrock-microsystem": "blackrock-neurotech", "cognionics": "cgx"}
 URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]+\.[A-Za-z]{2,}([/?#].*)?$")
+US_STATES = {s.lower() for s in (
+    "Alabama Alaska Arizona Arkansas California Colorado Connecticut Delaware Florida Georgia Hawaii Idaho Illinois "
+    "Indiana Iowa Kansas Kentucky Louisiana Maine Maryland Massachusetts Michigan Minnesota Mississippi Missouri "
+    "Montana Nebraska Nevada Ohio Oklahoma Oregon Pennsylvania Texas Utah Vermont Virginia Washington Wisconsin "
+    "Wyoming").split()} | {"new hampshire", "new jersey", "new mexico", "new york state", "north carolina",
+                           "north dakota", "rhode island", "south carolina", "south dakota", "west virginia"}
+CITY_JUNK = {"n", "na", "n/a", "-", "eu", "us", "usa", "uk", "dc", "offices across the us"}
+CITY_FIXES = {"san fracisco": "San Francisco", "copenhaguen": "Copenhagen", "montréal": "Montreal"}
 KIND_NOTE = {"Hardware", "Software", "Services", "Medical device", "Pharma", "Biotechnology", "Digital Therapeutics",
              "Digital Health", "Consumables", "Biomedical instruments", "Medical products", "Surgical products",
              "Software as medicine", "Telemedicine"}
@@ -99,7 +107,10 @@ def main(path: str) -> int:
     nodes: dict[str, dict] = {}
     skipped, merged, unmapped = [], [], 0
     with open(path, newline="", encoding="utf-8") as fh:
-        for row in csv.DictReader(fh):
+        rows = list(csv.DictReader(fh))
+    country_names = {c.lower() for r in rows for c in countries(r["country"])} | {v.lower() for v in COUNTRY.values()}
+    if True:
+        for row in rows:
             name = row["name"].strip()
             nid = slug(name)
             if not nid:
@@ -129,8 +140,19 @@ def main(path: str) -> int:
             if url:
                 node["url"] = url
             where = countries(row["country"])
+            place = re.sub(r"\s*\(.*?\)", "", html.unescape(row.get("city", "")).strip())
+            place = re.split(r"\s*(?:/|;|,)\s*", place)[0].strip()
+            place = CITY_FIXES.get(place.lower(), place)
+            if where and where[0].lower() in US_STATES:  # the source sometimes puts a US state in the country column
+                where = ["United States"]
+            if place.lower() in CITY_JUNK or place.lower() in US_STATES or place.lower() in country_names:
+                place = ""  # a state, a country or a placeholder, not a city
+            if place.lower() == "hong kong":
+                where = ["Hong Kong"]
             if where:
                 node["country"] = ", ".join(where)
+            if place:
+                node["city"] = place
             if mods:
                 node["modalities"] = mods
             nodes[nid] = node

@@ -1,0 +1,79 @@
+# Headquarters (or main site) of the hand-written organisations in orgs.yaml, written from memory and not
+# checked against any source. "City, Country", or just "Country" where only that is known. Organisations
+# that are distributed teams or communities have no entry and do not appear on the map.
+# Imported companies carry their own city and country in orgs-ntx-ecosystem.yaml.
+locations:
+  openbci: Brooklyn, United States
+  interaxon: Toronto, Canada
+  emotiv: San Francisco, United States
+  gtec: Schiedlberg, Austria
+  mentalab: Munich, Germany
+  upside-down-labs: India
+  kernel: Los Angeles, United States
+  neuroelectrics: Barcelona, Spain
+  imec: Leuven, Belgium
+  catalystneuro: Benicia, United States
+  nirx: Berlin, Germany
+  ant-neuro: Enschede, Netherlands
+  egi: Eugene, United States
+  meta: Menlo Park, United States
+  siemens-healthineers: Erlangen, Germany
+  ge-healthcare: Chicago, United States
+  divergence-neuro: Toronto, Canada
+  mendi: Stockholm, Sweden
+  elemind: Cambridge, United States
+  beacon-biosignals: Boston, United States
+  neurable: Boston, United States
+  idun: Zurich, Switzerland
+  cgx: San Diego, United States
+  neurosky: San Jose, United States
+  wearable-sensing: San Diego, United States
+  biosemi: Amsterdam, Netherlands
+  brain-products: Gilching, Germany
+  advanced-brain-monitoring: Carlsbad, United States
+  natus: Middleton, United States
+  tmsi: Oldenzaal, Netherlands
+  artinis: Elst, Netherlands
+  paradromics: Austin, United States
+  magventure: Farum, Denmark
+  magstim: Whitland, United Kingdom
+  rogue-research: Montreal, Canada
+  soterix-medical: New York, United States
+  boston-scientific: Marlborough, United States
+  medtronic: Minneapolis, United States
+  abbott: North Chicago, United States
+  neuropace: Mountain View, United States
+  livanova: London, United Kingdom
+  cochlear: Sydney, Australia
+  neuronetics: Malvern, United States
+  brainsway: Jerusalem, Israel
+  flow-neuroscience: Malmö, Sweden
+  blackrock-neurotech: Salt Lake City, United States
+  neuralink: Fremont, United States
+  synchron: New York, United States
+  ucsd: San Diego, United States
+  radboud-university: Nijmegen, Netherlands
+  stanford: Palo Alto, United States
+  temple-university: Philadelphia, United States
+  mit: Cambridge, United States
+  university-of-toronto: Toronto, Canada
+  camh: Toronto, Canada
+  hhmi-janelia: Ashburn, United States
+  inria: Paris, France
+  child-mind-institute: New York, United States
+  university-of-oxford: Oxford, United Kingdom
+  ucl: London, United Kingdom
+  tu-berlin: Berlin, Germany
+  nimh: Bethesda, United States
+  fmrib: Oxford, United Kingdom
+  fil: London, United Kingdom
+  martinos-center: Boston, United States
+  ibs-lab: Berlin, Germany
+  sccn: San Diego, United States
+  donders: Nijmegen, Netherlands
+  ncan: Albany, United States
+  temple-nedc: Philadelphia, United States
+  mit-lcp: Cambridge, United States
+  poldrack-lab: Palo Alto, United States
+  neurotechx: Montreal, Canada
+  open-science-tools: Nottingham, United Kingdom
