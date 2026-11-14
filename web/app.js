@@ -1061,7 +1061,11 @@ function init(data) {
   $("#f-modality").addEventListener("change", (e) => { state.modality = e.target.value; applyFilters(); });
   $("#f-clinical").addEventListener("change", (e) => { state.clinical = e.target.checked; applyFilters(); });
   $("#f-connected").addEventListener("change", (e) => { state.connected = e.target.checked; applyFilters(); });
-  document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
+  document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
+    // Pressing "Open gaps" again closes it.
+    showView(b.dataset.view === "gaps" && !$("#gaps").hidden ? "network" : b.dataset.view);
+  }));
+  $("#close-gaps").addEventListener("click", () => showView("network"));
   $("#filters-toggle").addEventListener("click", (e) => {
     e.currentTarget.setAttribute("aria-expanded", e.currentTarget.getAttribute("aria-expanded") !== "true");
   });
