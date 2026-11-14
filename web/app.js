@@ -259,7 +259,8 @@ function neighbourhood(id) {
 }
 function refreshHighlight() {
   const focus = state.hovered || state.selected;
-  state.highlight = focus ? neighbourhood(focus) : null;
+  // Connections only matter in the abstract network; Map and Brain show positions, so nothing is dimmed.
+  state.highlight = focus && state.layout === "network" ? neighbourhood(focus) : null;
   if (view) view.restyle();
 }
 function select(id, { fly = false } = {}) {
@@ -824,6 +825,7 @@ function applyLayout(layout) {
   $("#layout-note").textContent = LAYOUT_NOTE[layout];
   $("#layout-note").hidden = !LAYOUT_NOTE[layout];
   pinNodes();
+  refreshHighlight();
   view.setLayout(layout);
   state.touched = false;
   applyFilters();
