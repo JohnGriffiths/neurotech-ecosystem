@@ -80,6 +80,10 @@ node tools/make_world_data.js         # regenerate web/world.json (needs world-a
   last two and shrinks the nodes; `inLayout(n)` hides nodes with no `geo` (map) or `brain` sites (brain);
   `view.setLayout()` builds the 3D globe or brain backdrop, and the 2D renderer draws its own in
   `drawBackdrop2d`. Reference data loads on demand (`ref.world`, `ref.brain`).
+- Guided demos: `web/demos.js` holds declarative demo scripts (`DEMOS`). Each step names the state the viewer
+  should be in and the runner clicks the real controls to get there, so steps are independent and Back works.
+  Add a demo by appending to `DEMOS`; `tests/demos_check.js` checks every step against the graph. Demos are
+  also reachable at `#demo-<id>`. `app.js` exposes only a tiny `window.NTX` (degree, has, select, reset).
 - Find a project: `web/find.js` is a standalone matcher (`NTXFind.index(graph).search(text, opts)`) that runs in
   the browser and in node; `tests/find_check.js` exercises it through `tests/test_find.py`. The Find panel in
   `app.js` (`initFind`) renders its results.

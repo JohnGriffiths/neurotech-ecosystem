@@ -74,6 +74,15 @@ switch to MNI coordinate space and place them where in the brain they are typica
   imported companies with no city sit at the centre of their country; tfus (focused ultrasound) has no
   device, so nothing is shown for it in the Brain layout.
 
+## Guided demos
+
+A play button in the header opens five click-through demos: the big picture, who is where and how big (map
+and size), devices in the brain, finding a project, and from a gap to a project. Each step shows a caption
+card with Back and Next while the page performs the actions by clicking the real controls. They are meant
+for introducing the tool to students, volunteers and maintainers, and `#demo-map` style links start one
+directly. They are scripted in `web/demos.js`; a test checks that every item they mention still exists.
+The demos describe the current seed data honestly, including that the wants behind the gaps are unverified.
+
 ## Use case: finding a project to work on
 
 Added at the owner's request: a **Find** tab where a person types a paragraph or a list of keywords about

@@ -354,7 +354,7 @@ function renderDetail() {
     el("button", { className: "icon close", textContent: "✕", ariaLabel: "Close details", onclick: () => select(null) }),
     el("div", { className: "kind" }, glyph(TYPES[n.type].shape, C[TYPES[n.type].color], isHollow(n)), typeLabel(n)),
     el("h2", { className: "name", textContent: n.name }),
-    chips.length ? el("div", { className: "chips" }, ...chips.map((c) => el("span", { className: "tag", textContent: c }))) : null,
+    ...[chips.length ? el("div", { className: "chips" }, ...chips.map((c) => el("span", { className: "tag", textContent: c }))) : null].filter(Boolean),
     el("p", { textContent: n.description }),
     ...[provenance, repo].filter(Boolean));
   if (n.type === "org" && (n.metrics || state.sizeBy !== "auto")) {
@@ -1195,6 +1195,26 @@ function init(data) {
   });
   if (location.hash === "#gaps") showView("gaps");
   if (location.hash === "#find") showView("find");
+
+  // A deliberately small surface for the guided demos (web/demos.js); everything else they do is a real click.
+  window.NTX = {
+    degree: (id) => (adjacency[id] || new Set()).size,
+    has: (id) => !!byId[id],
+    select: (id) => (id ? select(id, { fly: true }) : select(null)),
+    /** Put the viewer back in its starting state. */
+    reset() {
+      state.found = null; $("#found-bar").hidden = true;
+      select(null);
+      if (state.layout !== "network") applyLayout("network");
+      resetFilters();
+      state.connected = true; $("#f-connected").checked = true;
+      state.lens = "type"; setSeg("#lens", "type");
+      state.sizeBy = "auto"; state.sizeScale = "tier"; setSeg("#size-by", "auto"); setSeg("#size-scale", "tier");
+      state.labels = false; $("#labels").setAttribute("aria-pressed", "false");
+      applySizes(); renderSizeLegend(); showView("network"); applyFilters(); view.restyle(); view.fit(500);
+    },
+  };
+  document.dispatchEvent(new Event("ntx-ready"));
 }
 
 try { const saved = localStorage.getItem("theme"); if (saved) document.documentElement.dataset.theme = saved; } catch (e) { /* private mode */ }
