@@ -131,6 +131,10 @@ button.link:hover { text-decoration-color: currentColor; }
 .hud .icon[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: transparent; }
 .hud .seg { border-radius: 10px; }
 .hud .seg button { padding: 5px 11px; font: 700 11px/1.5 var(--display); letter-spacing: .06em; }
+.zoom { display: flex; align-items: center; gap: 2px; padding: 2px; border-radius: 10px; }
+.zoom .icon { width: 30px; height: 30px; border: 0; }
+.zoom input[type=range] { width: 120px; accent-color: var(--accent); touch-action: none; }
+#graph { touch-action: none; -webkit-tap-highlight-color: transparent; }
 .hud .hint { color: var(--muted); font-size: 12px; margin-left: 4px; }
 body[data-mode="2d"] #rotate, body[data-mode="2d"] .hint { display: none; }
 .scene-tooltip { background: var(--panel-solid) !important; color: var(--text) !important; border: 1px solid var(--line);
@@ -166,7 +170,8 @@ body[data-mode="2d"] #rotate, body[data-mode="2d"] .hint { display: none; }
   .sheet-toggle[aria-expanded="false"] + .sheet-body { display: none; }
   .sheet-body { padding: 0 14px 14px; }
   #detail { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; max-height: 55%; z-index: 5; }
-  .hud { left: 12px; bottom: 68px; }
+  .hud { left: 12px; right: 12px; bottom: 68px; flex-wrap: wrap; }
+  .zoom input[type=range] { width: 96px; }
   .hud .hint { display: none; }
   #gaps { inset: 118px 12px 12px; }
 }

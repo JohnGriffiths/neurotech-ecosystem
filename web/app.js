@@ -471,6 +471,17 @@ function layoutDirection() {
   return undefined;
 }
 
+// A two-finger pinch must not select whatever is under the fingers when they lift.
+const touches = new Set();
+let pinchUntil = 0;
+const pinching = () => touches.size > 1 || performance.now() < pinchUntil;
+function trackTouches(el) {
+  el.addEventListener("pointerdown", (e) => { touches.add(e.pointerId); if (touches.size > 1) pinchUntil = performance.now() + 600; }, true);
+  const lift = (e) => { if (touches.size > 1) pinchUntil = performance.now() + 600; touches.delete(e.pointerId); };
+  el.addEventListener("pointerup", lift, true);
+  el.addEventListener("pointercancel", lift, true);
+}
+
 /** Gentle pull to the centre so disconnected clusters stay in frame. */
 function gravityForce(k, dims) {
   let nodes = [];
@@ -492,8 +503,8 @@ function commonSetup(fg, dims) {
     .linkDirectionalParticleColor((l) => (l.type === "REALLY_WANTS" ? C.magenta : C.text))
     .d3VelocityDecay(0.32)
     .onNodeHover((n) => { state.hovered = n ? n.id : null; refreshHighlight(); $("#graph").style.cursor = n ? "pointer" : ""; })
-    .onNodeClick((n) => select(n.id, { fly: true }))
-    .onBackgroundClick(() => select(null));
+    .onNodeClick((n) => { if (!pinching()) select(n.id, { fly: true }); })
+    .onBackgroundClick(() => { if (!pinching()) select(null); });
   fg.d3Force("gravity", gravityForce(dims === 3 ? 0.06 : 0.075, dims));
   fg.d3Force("link").distance((l) => LINK_DISTANCE[l.type] || 60);
   return fg;
@@ -546,6 +557,7 @@ function make2d(container) {
     .linkDirectionalArrowLength((l) => (linkLit(l) ? 4.5 : l.type === "USES" ? 0 : 2.2))
     .linkDirectionalParticleWidth(2.6)
     .autoPauseRedraw(false)
+    .minZoom(0.2).maxZoom(80)
     .onRenderFramePre((ctx, scale) => drawBackdrop2d(ctx, scale))
     .warmupTicks(140).cooldownTicks(260);
   fg.d3Force("charge").strength(-260).distanceMax(600);
@@ -558,6 +570,7 @@ function make2d(container) {
     fit: (ms) => fg.zoomToFit(ms, window.innerWidth < 820 ? 30 : 70),
     resize: () => fg.width(window.innerWidth).height(window.innerHeight),
     setRotate: () => {},
+    zoom: { min: 0.2, max: 80, get: () => fg.zoom(), set: (k, ms = 0) => fg.zoom(k, ms) },
     destroy: () => { fg._destructor(); container.replaceChildren(); },
   };
 }
@@ -672,7 +685,7 @@ function make3d(container) {
     .warmupTicks(120).cooldownTicks(240);
   fg.d3Force("charge").strength(-150).distanceMax(500);
   const controls = fg.controls();
-  Object.assign(controls, { enableDamping: true, dampingFactor: 0.12, autoRotateSpeed: 0.6, autoRotate: state.rotate });
+  Object.assign(controls, { minDistance: 18, maxDistance: 3000, enableDamping: true, dampingFactor: 0.12, autoRotateSpeed: 0.6, autoRotate: state.rotate });
   const fog = fg.scene().fog = new T.Fog(C.bg, 1, 4000); // depth cue: far nodes fade into the background
   let radius = 400, alive = true, backdrop = null;
 
@@ -800,6 +813,16 @@ function make3d(container) {
     },
     resize: () => fg.width(window.innerWidth).height(window.innerHeight),
     setRotate: (on) => { controls.autoRotate = on; },
+    // Zoom is the inverse of the camera's distance from what it orbits, so larger means closer in both views.
+    zoom: {
+      min: 1000 / 3000, max: 1000 / 18,
+      get: () => 1000 / Math.max(1, fg.camera().position.distanceTo(controls.target)),
+      set: (k, ms = 0) => {
+        const t = controls.target, p = fg.camera().position, d = 1000 / k;
+        const len = Math.max(1e-6, p.distanceTo(t));
+        fg.cameraPosition({ x: t.x + ((p.x - t.x) / len) * d, y: t.y + ((p.y - t.y) / len) * d, z: t.z + ((p.z - t.z) / len) * d }, { x: t.x, y: t.y, z: t.z }, ms);
+      },
+    },
     destroy: () => { alive = false; fg._destructor(); container.replaceChildren(); },
   };
 }
@@ -838,6 +861,27 @@ function applyLayout(layout) {
     const nodes = view.fg.graphData().nodes;
     if (nodes.length && !Number.isFinite(nodes[0].x) && ++frames < 30) { requestAnimationFrame(settle); return; }
     view.fit(700, layoutDirection());
+  })();
+}
+
+/** Minus, slider and plus for zooming without pinching. The slider follows pinch and wheel zoom too. */
+function bindZoom() {
+  const slider = $("#zoom-dial");
+  let dragging = false;
+  const toT = (k, z) => (100 * Math.log(k / z.min)) / Math.log(z.max / z.min);
+  const toK = (t, z) => z.min * Math.pow(z.max / z.min, t / 100);
+  const clamp = (k, z) => Math.min(z.max, Math.max(z.min, k));
+  const step = (factor) => { state.touched = true; const z = view.zoom; z.set(clamp(z.get() * factor, z), 250); };
+  $("#zoom-in").addEventListener("click", () => step(1.5));
+  $("#zoom-out").addEventListener("click", () => step(1 / 1.5));
+  slider.addEventListener("pointerdown", () => { dragging = true; state.touched = true; });
+  slider.addEventListener("pointerup", () => { dragging = false; });
+  slider.addEventListener("input", () => { state.touched = true; view.zoom.set(toK(Number(slider.value), view.zoom), 0); });
+  (function follow() {
+    requestAnimationFrame(follow);
+    if (!view || dragging || document.activeElement === slider) return;
+    const t = Math.round(toT(clamp(view.zoom.get(), view.zoom), view.zoom));
+    if (Number(slider.value) !== t) slider.value = t;
   })();
 }
 
@@ -901,8 +945,10 @@ function initGraph() {
   mount(saved === "2d" ? "2d" : "3d");
 
   window.addEventListener("resize", () => view.resize());
+  trackTouches($("#graph"));
   $("#fit").addEventListener("click", () => view.fit(600));
   $("#rotate").addEventListener("click", () => setRotate(!state.rotate));
+  bindZoom();
   $("#labels").addEventListener("click", () => {
     state.labels = !state.labels;
     $("#labels").setAttribute("aria-pressed", String(state.labels));
