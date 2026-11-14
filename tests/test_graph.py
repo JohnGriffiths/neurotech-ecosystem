@@ -113,3 +113,19 @@ def test_modalities_shorthand_and_facets(tmp_path):
 def test_indicated_for_needs_stage(tmp_path):
     *_, errors, _ = write_graph(tmp_path, [{"from": "implant", "type": "INDICATED_FOR", "to": "tremor"}])
     assert any("needs stage" in e for e in errors)
+
+
+def test_provenance_fields_and_stale(tmp_path):
+    nodes = [
+        {"id": "old", "type": "org", "kind": "company", "name": "Old", "description": "d",
+         "source": "import-x", "checked": 2022, "status": "unknown", "country": "Canada"},
+        {"id": "fresh", "type": "org", "kind": "company", "name": "Fresh", "description": "d", "checked": "2026-11"},
+        {"id": "never", "type": "org", "kind": "company", "name": "Never", "description": "d"},
+        {"id": "bad", "type": "org", "kind": "company", "name": "Bad", "description": "d",
+         "checked": "last year", "status": "asleep"},
+    ]
+    loaded, _, errors, _ = write_graph(tmp_path, [], nodes)
+    assert any("checked must be" in e for e in errors) and any("org status must be" in e for e in errors)
+    groups = ntgraph.stale([n for n in loaded if n["id"] != "bad"], before=2026)
+    assert [n["id"] for n in groups["import-x"]] == ["old"]
+    assert [n["id"] for n in groups[""]] == ["never"]

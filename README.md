@@ -60,7 +60,16 @@ python -m pytest                     # tests
 
 ## Status of the seed data
 
-The graph was seeded by hand to exercise the schema and viewer. **Every edge is currently `unverified`.**
+**Every edge is currently `unverified`**, and nothing has been checked against a live source since it was
+entered. There are two kinds of record:
+
+- About 270 hand-written nodes (projects, people, devices, technologies and some organisations), seeded to
+  exercise the schema and viewer.
+- 537 companies imported from a snapshot of the NeuroTechX ecosystem database dated January 2022 at the
+  latest. Some have since closed, merged or been renamed. `python tools/ntgraph.py stale` lists what still
+  needs checking.
+
+For the hand-written part:
 That includes who maintains what, people's affiliations, clinical indications and their regulatory stage,
 and above all the `REALLY_WANTS` edges, which are hypotheses that have not been confirmed with the party
 named. Verifying them, and correcting what is wrong, is the job of the first cartography sprint.

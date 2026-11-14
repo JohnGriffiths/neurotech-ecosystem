@@ -206,3 +206,33 @@ two steps.
 > Save this conversation and put in the GitHub repo so I can easily switch to another harnesses  get up to speed
 
 **Assistant:** Wrote `AGENTS.md`, `docs/HANDOFF.md`, this file, and `tools/smoke_viewer.js`.
+
+## 8. A second source of companies
+
+**Owner:**
+
+> Here is at additional source for companies. It's a useful relational database
+>
+> https://github.com/neurotechx/neurotech-ecosystem
+
+**Assistant:** Found that `NeuroTechX/neurotech-ecosystem` is private, contains only web-app code, keeps its
+data in Airtable, and could not be attached to the session because it shares this repository's name. Asked
+for a CSV export or an Airtable token, and said that only company-level fields would be imported because
+this repository is public.
+
+**Owner:**
+
+> I have access to it
+
+**Assistant:** Opened a second, read-only session on that repository. It found a leftover snapshot of 580
+company records (January 2022 at the latest) and exported company-level columns as a file.
+
+**Owner** (while that was running):
+
+> We will need to update the companies info to 2026/2027.
+
+**Assistant:** Added `source`, `checked`, organisation `status` and `country` to the schema, a `stale`
+command, and `tools/import_ntx_ecosystem.py`. Imported 537 companies (39 already present, 4 duplicates
+merged), leaving out the curators' notes, contact emails and funding. 275 imported companies have no
+technology link and are hidden in the viewer by default. No company has yet been checked against a current
+source; see [HANDOFF.md](HANDOFF.md) for how the update is meant to proceed.

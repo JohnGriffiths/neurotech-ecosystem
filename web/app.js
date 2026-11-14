@@ -48,7 +48,7 @@ const CLAIM_EDGES = new Set(["REALLY_WANTS", "ADDRESSES", "BLOCKS", "INDICATED_F
 const LINK_DISTANCE = { USES: 90, AFFILIATED_WITH: 30, MAINTAINS: 38 };
 
 const state = {
-  lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false,
+  lens: "type", types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: true,
   selected: null, hovered: null, highlight: null, mode: "3d", rotate: true,
 };
 let graph, byId, view = null, C = {}, adjacency = {}, allLinks = [];
@@ -168,6 +168,7 @@ function linkColor(l) {
 function passes(n) {
   const f = n.facets;
   return state.types.has(n.type)
+    && (!state.connected || n.deg > 0)
     && (!state.cls || f.class.includes(state.cls))
     && (!state.inv || f.invasiveness.includes(state.inv))
     && (!state.modality || f.modalities.includes(state.modality))
@@ -181,10 +182,13 @@ function applyFilters() {
   state.touched = false;
   if (state.selected && !ids.has(state.selected)) select(null);
   const verified = graph.edges.filter((e) => e.status === "verified").length;
-  $("#stats").textContent = `${nodes.length} of ${graph.nodes.length} entities · ${links.length} links · ${verified} of ${graph.edges.length} verified`;
+  const loose = graph.nodes.filter((n) => !n.deg).length;
+  $("#stats").textContent = `${nodes.length} of ${graph.nodes.length} entities · ${links.length} links · ${verified} of ${graph.edges.length} verified`
+    + (state.connected && loose ? ` · ${loose} unconnected hidden` : "");
 }
 function resetFilters() {
-  Object.assign(state, { types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false });
+  Object.assign(state, { types: new Set(Object.keys(TYPES)), cls: "", inv: "", modality: "", clinical: false, connected: false });
+  $("#f-connected").checked = false;
   setSeg("#f-class", ""); setSeg("#f-inv", "");
   $("#f-modality").value = ""; $("#f-clinical").checked = false;
   renderLegend();
@@ -263,8 +267,17 @@ function renderDetail() {
   const cap = (s) => s[0].toUpperCase() + s.slice(1);
   const chips = [
     ...(n.type === "problem" ? [] : [...f.class.map(cap), ...f.invasiveness.map(cap)]),
-    f.clinical && n.type !== "problem" && "Clinical", n.layer && cap(n.layer), n.status === "proposed" && "Proposed", ...(n.tags || []).map(cap),
+    f.clinical && n.type !== "problem" && "Clinical", n.layer && cap(n.layer), n.status === "proposed" && "Proposed",
+    n.type === "org" && n.status && n.status !== "unknown" && cap(n.status), n.country,
+    ...(n.tags || []).slice(0, 8).map(cap),
   ].filter(Boolean);
+  const SOURCES = { "ntx-ecosystem-2022": "NeuroTechX ecosystem database, 2022 snapshot" };
+  const provenance = n.source || n.checked
+    ? el("p", { className: "provenance", textContent: [
+        n.source && `Source: ${SOURCES[n.source] || n.source}.`,
+        n.checked ? `Last checked ${n.checked}; may be out of date.` : "Never checked.",
+      ].filter(Boolean).join(" ") })
+    : null;
   const repo = n.repo
     ? el("a", { className: "repo", href: `https://github.com/${n.repo}`, target: "_blank", rel: "noopener" })
     : n.url ? el("a", { className: "repo", href: n.url, target: "_blank", rel: "noopener", textContent: n.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") }) : null;
@@ -278,6 +291,7 @@ function renderDetail() {
     el("h2", { className: "name", textContent: n.name }),
     chips.length ? el("div", { className: "chips" }, ...chips.map((c) => el("span", { className: "tag", textContent: c }))) : null,
     el("p", { textContent: n.description }),
+    provenance,
     repo);
 
   const groups = new Map();
@@ -603,7 +617,7 @@ function initGraph() {
     degree[e.from] = (degree[e.from] || 0) + 1; degree[e.to] = (degree[e.to] || 0) + 1;
     (adjacency[e.from] ||= new Set()).add(e.to); (adjacency[e.to] ||= new Set()).add(e.from);
   });
-  graph.nodes.forEach((n) => { n.r = TYPES[n.type].base + 1.5 * Math.sqrt(degree[n.id] || 0); });
+  graph.nodes.forEach((n) => { n.deg = degree[n.id] || 0; n.r = TYPES[n.type].base + 1.5 * Math.sqrt(n.deg); });
   graph.nodes.filter((n) => n.type === "project").sort((a, b) => (degree[b.id] || 0) - (degree[a.id] || 0))
     .slice(0, 14).forEach((n) => { n.hub = true; });
   allLinks = graph.edges.map((e) => ({ source: e.from, target: e.to, type: e.type }));
@@ -649,6 +663,7 @@ function init(data) {
   bindSeg("#f-inv", (v) => { state.inv = v; applyFilters(); });
   $("#f-modality").addEventListener("change", (e) => { state.modality = e.target.value; applyFilters(); });
   $("#f-clinical").addEventListener("change", (e) => { state.clinical = e.target.checked; applyFilters(); });
+  $("#f-connected").addEventListener("change", (e) => { state.connected = e.target.checked; applyFilters(); });
   document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => showView(b.dataset.view)));
   $("#filters-toggle").addEventListener("click", (e) => {
     e.currentTarget.setAttribute("aria-expanded", e.currentTarget.getAttribute("aria-expanded") !== "true");

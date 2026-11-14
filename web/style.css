@@ -98,6 +98,7 @@ h2 { font: 400 10.5px/1.5 var(--display); text-transform: uppercase; letter-spac
 .glyph { width: 14px; height: 14px; flex: none; }
 select { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-solid); }
 .check { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--text-2); }
+.check + .check { margin-top: 6px; }
 .stats { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
 
 /* ---- detail ---- */
@@ -108,6 +109,7 @@ select { width: 100%; padding: 6px 8px; border-radius: 8px; border: 1px solid va
 #detail h2.name { font: 650 19px/1.25 ui-sans-serif, system-ui, sans-serif; letter-spacing: -.01em; text-transform: none; color: var(--text);
                   margin: 4px 32px 6px 0; line-height: 1.25; }
 #detail p { color: var(--text-2); }
+.provenance { margin-top: 8px; font-size: 12px; color: var(--muted) !important; }
 .chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
 .tag { display: inline-block; font-size: 11px; line-height: 1.6; padding: 0 7px; border-radius: 9px; border: 1px solid var(--line);
        color: var(--text-2); white-space: nowrap; }

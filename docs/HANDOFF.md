@@ -1,14 +1,17 @@
 # Handoff
 
-State of the project as of 2026-11-13, written so that another person or agent can continue without the
+State of the project as of 2026-11-14, written so that another person or agent can continue without the
 original session. See [AGENTS.md](../AGENTS.md) for how to work in the repository and
 [CONVERSATION.md](CONVERSATION.md) for the turn-by-turn record.
 
 ## Where things stand
 
 - `main` holds everything (the working branch `ccr-4306a83e-mkeyk9` is identical).
-- The graph has **272 nodes and 466 edges, none verified**: 64 projects, 93 organisations, 37 people,
+- The graph has **809 nodes and 780 edges, none verified**: 64 projects, 630 organisations, 37 people,
   28 devices, 19 technologies, 9 indications, 22 gaps. 18 gaps are open on the gaps board.
+- 537 of the organisations are companies imported from a 2022 snapshot of the NeuroTechX ecosystem
+  database (see "The 2022 company import" below). 275 of them have no technology link yet and are hidden in
+  the viewer by default ("Hide unconnected").
 - The site is live (see below). The validator and 9 tests pass. All 52 project repos were confirmed reachable on GitHub.
 - The viewer is complete enough to show: 3D rotatable network by default, 2D toggle, search, filters,
   three colour modes, detail panel, gaps board, light/dark, phone layout.
@@ -34,6 +37,7 @@ Be clear about this with anyone who asks.
 |---|---|
 | Project `repo` values | Checked: all 52 exist on GitHub (`check-repos`) |
 | Company list in `orgs.yaml` | From the owner's list plus the hardware section of `NeuroTechX/awesome-bci` |
+| Companies in `orgs-ntx-ecosystem.yaml` | Machine-imported from the NeuroTechX ecosystem database as it stood in January 2022 at the latest. Names, websites, countries and tags are the curators', not checked since. |
 | Everything else (maintainers, affiliations, dependencies, device support, modalities, indications and their regulatory stage) | Written from model memory, not checked against sources |
 | `REALLY_WANTS` edges | Hypotheses. None confirmed with the party named. |
 
@@ -49,6 +53,37 @@ Specific items flagged to the owner as uncertain:
 - **"Old NeuroTechX colour scheme".** neurotechx.com was unreachable from the build sandbox. Colours, logo,
   favicon and fonts were taken from the 2017 state of `NeuroTechX/neurotechx.github.io`. The owner has not
   yet confirmed that this is the era he meant.
+
+## The 2022 company import
+
+The owner pointed to the private repository `NeuroTechX/neurotech-ecosystem` as a source of companies. That
+repository is the code of the old neurotech-ecosystem.com site; the live data is in an Airtable base. It
+does contain a leftover snapshot (`frontend/src/utils/demo-records.json`, 580 company records, dated
+January 2022 at the latest), and that is what was imported.
+
+- A second cloud session read the private repo (this session could not attach it: same repository name as
+  this one) and exported a CSV with company-level columns only: name, website, type, technology,
+  applications, city, country.
+- **Deliberately left out:** the curators' free-text notes (informal internal remarks, some naming
+  individuals), career contact emails, funding, size, and record ids. Do not add them to this public repo.
+- `tools/import_ntx_ecosystem.py <companies.csv>` writes `graph/nodes/orgs-ntx-ecosystem.yaml`. Of 580 rows:
+  537 imported, 39 skipped as already in the graph, 4 duplicate rows merged. The CSV itself is not in the repo.
+- Each imported company has `source: ntx-ecosystem-2022`, `checked: "2022"`, `status: unknown`, the source's
+  own tags, and a technology link only where a tag maps unambiguously onto one of our technologies
+  (`MODALITY` in the import script). Generic tags such as "Brain Stimulation" or "Nerve Stimulation" are not
+  mapped, which is why 275 companies have no link.
+- Not imported: the academic labs table, the tag hierarchy (432 tags with parent/child links), investors.
+  The labs and current data exist only in Airtable base `appSq0xucbcRZW1tY` (tables `Industry`,
+  `Research Labs`, `NeuroTags`, `NeuroTags - Methods`, `NeuroTags - Subjects`). An old Airtable API key is
+  committed in that private repo's `backend/utils/api.js`; it was not used and should be revoked.
+
+**The owner has said the company information needs bringing up to 2026/2027.** The mechanism is in place:
+`python tools/ntgraph.py stale` lists every organisation, device and project whose `checked` date is missing
+or before this year (currently all 721), grouped by source. To update a company: confirm it against a live
+source, set `checked` to the date and `status` to `active`, `acquired` or `defunct`, fix the name, website
+and technologies, and move the record from `orgs-ntx-ecosystem.yaml` into `orgs.yaml` so a re-import cannot
+overwrite it. No company has been updated yet. Many are known to have closed, merged or been renamed since
+2022.
 
 ## Decisions and why
 
@@ -98,6 +133,9 @@ Specific items flagged to the owner as uncertain:
 
 Roughly in the order the original plan implies:
 
+0. **Update the companies to 2026/2027** (owner's request, see "The 2022 company import"). 537 imported
+   companies and 93 hand-written organisations, none checked. Suggested order: the 262 with a technology
+   link first, then decide whether the 275 without one belong in the graph at all.
 1. **Verify the seed data** (the "cartography sprint"): source and mark edges `verified`, fix what is wrong.
    Highest value: the `REALLY_WANTS` edges and the clinical indications.
 2. **Ingest more projects.** Only the hardware section of `NeuroTechX/awesome-bci` was used. Its software

@@ -14,6 +14,7 @@ Every imported record carries `source: ntx-ecosystem-2022`, `checked: "2022"` an
 from __future__ import annotations
 
 import csv
+import html
 import json
 import re
 import sys
@@ -50,7 +51,11 @@ COUNTRY = {
     "nl": "Netherlands", "the netherlands": "Netherlands", "holland": "Netherlands",
     "slovak republic": "Slovakia", "south korea": "South Korea", "korea": "South Korea",
     "united arab emirates (uae)": "United Arab Emirates", "uae": "United Arab Emirates",
+    "republic of ireland": "Ireland", "northern ireland": "United Kingdom", "tawain": "Taiwan",
 }
+# Source rows that are an organisation already in the graph under a newer name.
+ALIASES = {"blackrock-microsystem": "blackrock-neurotech", "cognionics": "cgx"}
+URL_RE = re.compile(r"^https?://[A-Za-z0-9.-]+\.[A-Za-z]{2,}([/?#].*)?$")
 KIND_NOTE = {"Hardware", "Software", "Services", "Medical device", "Pharma", "Biotechnology", "Digital Therapeutics",
              "Digital Health", "Consumables", "Biomedical instruments", "Medical products", "Surgical products",
              "Software as medicine", "Telemedicine"}
@@ -68,13 +73,13 @@ def domain(url: str) -> str:
 
 
 def tags(cell: str) -> list[str]:
-    return [t.strip() for t in (cell or "").split("|") if t.strip()]
+    return [html.unescape(t.strip()) for t in (cell or "").split("|") if t.strip()]
 
 
 def countries(cell: str) -> list[str]:
     """Split a free-text country cell and normalise each part. Unrecognised text is kept as written."""
     out = []
-    for part in re.split(r"\s*(?:/|;|,| and )\s*", (cell or "").strip()):
+    for part in re.split(r"\s*(?:/|;|,)\s*", (cell or "").strip()):
         if not part or part.upper() == "N/A":
             continue
         name = COUNTRY.get(part.lower(), part if part[:1].isupper() else part.title())
@@ -102,7 +107,9 @@ def main(path: str) -> int:
             url = row["website"].strip()
             if url and not url.startswith(("http://", "https://")):
                 url = "https://" + url
-            match = org_names.get(nid) or (org_domains.get(domain(url)) if domain(url) else None)
+            if not URL_RE.match(url):
+                url = ""  # placeholders such as "[Coming Soon]"
+            match = ALIASES.get(nid) or org_names.get(nid) or (org_domains.get(domain(url)) if domain(url) else None)
             if match:
                 skipped.append((name, match))
                 continue
