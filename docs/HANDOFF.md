@@ -76,7 +76,7 @@ switch to MNI coordinate space and place them where in the brain they are typica
 
 ## Guided demos
 
-A play button in the header opens five click-through demos: the big picture, who is where and how big (map
+A play button in the header opens six click-through demos: a five-click "first minute" (search, follow a link, switch layout, find a project), the big picture, who is where and how big (map
 and size), devices in the brain, finding a project, and from a gap to a project. Two modes, chosen in the
 menu and remembered: **Try it myself** (the default), where each step lists what to do, ticks the items as the
 person does them with the real controls, points at the control with a pulse and offers "Show me"; and **Watch**,

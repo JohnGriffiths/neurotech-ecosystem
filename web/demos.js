@@ -20,6 +20,16 @@
 
   const DEMOS = [
     {
+      id: "first", title: "Your first minute", blurb: "Five clicks: search, follow a link, switch view, find a project.",
+      steps: [
+        { title: "Look something up", text: "Every item in the graph can be found by name. Type EEG into the search box at the top and press Enter. The details open on the right, and the item is lit up in the view.", select: "eeg", pulse: "#search" },
+        { title: "Follow a connection", text: "Names in the details panel are links. Pick MNE-Python from the list of projects, or search for it, to jump to it and see who maintains it and what depends on it.", select: "mne-python" },
+        { title: "See where organisations are", text: "The Layout switch changes how the same data is laid out. Map pins every organisation at its headquarters. Network, the view you started in, shows how everything connects.", layout: "map", pulse: "#layout" },
+        { title: "Find something to work on", text: "The Find tab turns a few words about your interests into projects you could join and gaps you could fill. Click an example, then press Find.", layout: "map", view: "find", findText: LONG_FIND, find: true },
+        { title: "That is the tool", text: "Explore, locate, find. Close the panel and switch back to the Network layout. The ▶ button in the corner has longer demos on the map, the brain, sizes and gaps whenever you want them.", view: "network", pulse: "#demos-btn" },
+      ],
+    },
+    {
       id: "overview", title: "The big picture", blurb: "What is in the graph, and how it connects.",
       steps: [
         { title: "A map of the neurotech world", text: "Every dot is a project, organisation, person, device, technology, condition or gap. Lines are relationships. Drag to rotate, scroll or use the zoom control to move in.", pulse: "#graph" },
@@ -149,9 +159,8 @@
       if (t[key] && !b[key]) add(`Tick ${label}`, () => $(id).checked, id);
     }
     if (t.findGraph && !b.findGraph) add("Press Show matches on the network", () => !$("#found-bar").hidden, "#find-graph");
-    if ((t.select || null) !== (b.select || null) && t.view === "network") {
-      const name = t.select && NTX.name(t.select);
-      add(t.select ? `Select ${name}: click it in the view, or type its name in the search box` : "Click empty space to clear the selection", () => (NTX.selected() || null) === (t.select || null), "#search");
+    if (t.select && t.select !== b.select && t.view === "network") {
+      add(`Select ${NTX.name(t.select)}: click it in the view, or type its name in the search box`, () => NTX.selected() === t.select, "#search");
     }
     return g;
   }
