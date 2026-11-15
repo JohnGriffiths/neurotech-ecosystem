@@ -202,6 +202,7 @@ function applyFilters() {
   const ids = new Set(nodes.map((n) => n.id));
   const links = state.layout !== "network" ? [] : allLinks.filter((l) => ids.has(endId(l.source)) && ids.has(endId(l.target)));
   view.setData({ nodes, links });
+  state.shown = nodes; updateList();
   state.touched = false;
   if (state.selected && !ids.has(state.selected)) select(null);
   const verified = graph.edges.filter((e) => e.status === "verified").length;
@@ -274,6 +275,53 @@ function renderLegend() {
   renderKey();
 }
 
+// ------------------------------------------------------- entities shown ---
+/** The list of everything currently shown, after filters, layout and matches. Built only while it is open. */
+function updateList() {
+  const nodes = state.shown || [];
+  $("#list-count").textContent = nodes.length;
+  $("#list-btn").title = `List the ${nodes.length} entities currently shown`;
+  if (!$("#entity-list").hidden) renderList();
+}
+function renderList() {
+  const q = $("#el-filter").value.trim().toLowerCase();
+  const nodes = (state.shown || []).filter((n) => !q || n.name.toLowerCase().includes(q) || (n.repo || "").toLowerCase().includes(q));
+  $("#el-title").textContent = q ? `${nodes.length} of ${(state.shown || []).length} shown` : `${nodes.length} shown`;
+  const body = $("#el-body"), frag = document.createDocumentFragment();
+  for (const type of Object.keys(TYPES)) {
+    const group = nodes.filter((n) => n.type === type).sort((a, b) => a.name.localeCompare(b.name));
+    if (!group.length) continue;
+    frag.append(el("h4", {}, glyph(TYPES[type].shape, C[TYPES[type].color]), `${TYPES[type].label} · ${group.length}`));
+    const ul = el("ul");
+    for (const n of group) {
+      const li = el("li", {}, el("button", { textContent: n.name, title: typeLabel(n), onclick: () => select(n.id, { fly: true }) }));
+      li.dataset.id = n.id;
+      if (n.id === state.selected) li.className = "current";
+      ul.append(li);
+    }
+    frag.append(ul);
+  }
+  if (!nodes.length) frag.append(el("p", { className: "el-empty", textContent: q ? "Nothing in this list matches." : "Nothing is shown. Loosen a filter." }));
+  body.replaceChildren(frag);
+}
+function markListSelection() {
+  if ($("#entity-list").hidden) return;
+  document.querySelectorAll("#el-body li.current").forEach((li) => li.classList.remove("current"));
+  const li = state.selected && document.querySelector(`#el-body li[data-id="${CSS.escape(state.selected)}"]`);
+  if (li) { li.classList.add("current"); li.scrollIntoView({ block: "nearest" }); }
+}
+function bindList() {
+  const toggle = (open) => {
+    $("#entity-list").hidden = !open;
+    $("#list-btn").setAttribute("aria-pressed", String(open));
+    if (open) { renderList(); markListSelection(); }
+  };
+  $("#list-btn").addEventListener("click", () => toggle($("#entity-list").hidden));
+  $("#el-close").addEventListener("click", () => toggle(false));
+  $("#el-filter").addEventListener("input", renderList);
+  updateList();
+}
+
 /** A small key that stays on screen and follows the chosen colouring. */
 function renderKey() {
   const list = $("#key-list");
@@ -304,6 +352,7 @@ function select(id, { fly = false } = {}) {
   if (id && !inLayout(byId[id])) applyLayout("network");
   if (id && !passes(byId[id])) { resetFilters(); applyFilters(); }
   state.selected = id;
+  markListSelection();
   refreshHighlight();
   renderDetail();
   try { history.replaceState(null, "", id ? `#${id}` : location.pathname + location.search); } catch (e) { /* file:// */ }
@@ -1115,6 +1164,7 @@ function initGraph() {
   $("#fit").addEventListener("click", () => view.fit(600));
   $("#rotate").addEventListener("click", () => setRotate(!state.rotate));
   bindZoom();
+  bindList();
   let keyOpen = true;
   keyOpen = window.innerWidth >= 820;    // collapsed by default on a phone, where space is tight
   try { const saved = localStorage.getItem("keyOpen"); if (saved) keyOpen = saved === "1"; } catch (e) { /* private mode */ }

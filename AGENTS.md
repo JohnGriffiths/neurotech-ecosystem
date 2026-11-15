@@ -80,6 +80,8 @@ node tools/make_world_data.js         # regenerate web/world.json (needs world-a
   last two and shrinks the nodes; `inLayout(n)` hides nodes with no `geo` (map) or `brain` sites (brain);
   `view.setLayout()` builds the 3D globe or brain backdrop, and the 2D renderer draws its own in
   `drawBackdrop2d`. Reference data loads on demand (`ref.world`, `ref.brain`).
+- The list button (bottom controls) opens `#entity-list`: everything currently shown after filters, layout and
+  matches (`state.shown`, set in `applyFilters`), grouped by type, filterable, click to select.
 - Guided demos: `web/demos.js` holds declarative demo scripts (`DEMOS`). Each step names the state the viewer
   should be in. In "Watch" mode the runner clicks the real controls to get there; in "Try it myself" mode it
   derives a checklist from what differs from the previous step and ticks items as the person does them. Steps
